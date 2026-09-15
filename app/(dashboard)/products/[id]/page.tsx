@@ -56,6 +56,8 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                 <Th>SKU</Th>
                 <Th>Size</Th>
                 <Th>Color</Th>
+                <Th>Length / Style / Material</Th>
+                <Th>Retail price</Th>
                 <Th>Stock</Th>
                 <Th>Reorder point</Th>
                 <Th />
@@ -67,6 +69,10 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                   <Td className="font-mono text-xs text-ink/70">{v.sku}</Td>
                   <Td>{v.size}</Td>
                   <Td>{v.color}</Td>
+                  <Td className="whitespace-nowrap text-xs text-ink/60">
+                    {[v.length, v.style, v.material].filter(Boolean).join(" · ") || "—"}
+                  </Td>
+                  <Td>{v.retail_price != null ? formatCurrency(v.retail_price) : "—"}</Td>
                   <Td>
                     {v.stock_quantity}
                     {v.stock_quantity <= v.reorder_point && (

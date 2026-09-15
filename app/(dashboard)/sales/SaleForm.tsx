@@ -5,7 +5,7 @@ import { FormField, Input, Select, Checkbox, Textarea } from "@/components/ui/Fi
 import { Button } from "@/components/ui/Button";
 import type { FormState } from "@/lib/actions/sales";
 import type { Sale, VariantWithProduct } from "@/lib/types";
-import { CHANNELS, PAYMENT_METHODS } from "@/lib/types";
+import { SALE_FORM_CHANNELS, PAYMENT_METHODS } from "@/lib/types";
 import { toTitleCase } from "@/lib/utils";
 
 const initialState: FormState = { error: null };
@@ -30,11 +30,15 @@ export function SaleForm({
           <option value="" disabled>
             Select a SKU…
           </option>
-          {variants.map((v) => (
-            <option key={v.id} value={v.id}>
-              {v.product.name} — {v.size}/{v.color} ({v.sku}) · {v.stock_quantity} in stock
-            </option>
-          ))}
+          {variants.map((v) => {
+            const attrs = [v.length, v.style, v.material].filter(Boolean).join(" · ");
+            return (
+              <option key={v.id} value={v.id}>
+                {v.product.name} — {v.size}/{v.color}
+                {attrs ? ` · ${attrs}` : ""} ({v.sku}) · {v.stock_quantity} in stock
+              </option>
+            );
+          })}
         </Select>
       </FormField>
 
@@ -48,12 +52,17 @@ export function SaleForm({
             defaultValue={defaultValues?.sale_date ?? new Date().toISOString().slice(0, 10)}
           />
         </FormField>
-        <FormField label="Channel" htmlFor="channel">
+        <FormField
+          label="Channel"
+          htmlFor="channel"
+          hint={defaultValues?.channel === "unknown" ? "Imported without a recorded channel — pick the real one if you know it" : undefined}
+        >
           <Select id="channel" name="channel" required defaultValue={defaultValues?.channel ?? ""}>
             <option value="" disabled>
               Select…
             </option>
-            {CHANNELS.map((c) => (
+            {defaultValues?.channel === "unknown" && <option value="unknown">Unknown</option>}
+            {SALE_FORM_CHANNELS.map((c) => (
               <option key={c} value={c}>
                 {toTitleCase(c)}
               </option>

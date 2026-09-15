@@ -8,12 +8,30 @@ export interface FormState {
   error: string | null;
 }
 
+function optionalText(formData: FormData, key: string): string | null {
+  const value = String(formData.get(key) ?? "").trim();
+  return value || null;
+}
+
+function optionalNumber(formData: FormData, key: string): number | null {
+  const raw = String(formData.get(key) ?? "").trim();
+  if (!raw) return null;
+  const value = Number(raw);
+  return Number.isFinite(value) ? value : NaN;
+}
+
 function parseVariantForm(formData: FormData) {
   return {
     product_id: String(formData.get("product_id") ?? ""),
     sku: String(formData.get("sku") ?? "").trim(),
     size: String(formData.get("size") ?? "").trim(),
     color: String(formData.get("color") ?? "").trim(),
+    length: optionalText(formData, "length"),
+    style: optionalText(formData, "style"),
+    material: optionalText(formData, "material"),
+    base_cost: optionalNumber(formData, "base_cost"),
+    retail_price: optionalNumber(formData, "retail_price"),
+    wholesale_price: optionalNumber(formData, "wholesale_price"),
     stock_quantity: Number(formData.get("stock_quantity")),
     reorder_point: Number(formData.get("reorder_point")),
   };
@@ -26,6 +44,10 @@ function validateVariantForm(fields: ReturnType<typeof parseVariantForm>): strin
   if (!fields.color) return "Give this variant a color.";
   if (!Number.isInteger(fields.stock_quantity) || fields.stock_quantity < 0) return "Stock quantity must be zero or more.";
   if (!Number.isInteger(fields.reorder_point) || fields.reorder_point < 0) return "Reorder point must be zero or more.";
+  if (fields.base_cost !== null && (!Number.isFinite(fields.base_cost) || fields.base_cost < 0)) return "Base cost must be zero or more.";
+  if (fields.retail_price !== null && (!Number.isFinite(fields.retail_price) || fields.retail_price < 0)) return "Retail price must be zero or more.";
+  if (fields.wholesale_price !== null && (!Number.isFinite(fields.wholesale_price) || fields.wholesale_price < 0))
+    return "Wholesale price must be zero or more.";
   return null;
 }
 

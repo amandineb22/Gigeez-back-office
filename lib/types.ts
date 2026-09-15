@@ -3,7 +3,9 @@
  * add/rename a column there, update the matching type here.
  */
 
-export type Channel = "online" | "in-store" | "wholesale" | "pop-up";
+export type Channel = "online" | "in-store" | "wholesale" | "pop-up" | "unknown";
+
+export type StockUnitStatus = "in_stock" | "sold";
 
 export type ExpenseCategory =
   | "materials"
@@ -39,10 +41,52 @@ export interface Variant {
   sku: string;
   size: string;
   color: string;
+  /** Raw stock-sheet code (X/D/N/U…) — displayed as-is, no confirmed legend. */
+  length: string | null;
+  /** Raw stock-sheet code (SF/AY/EC/BF/GC/UU…) — displayed as-is. */
+  style: string | null;
+  /** Raw stock-sheet code (VI/CH/CS/SI…) — displayed as-is. */
+  material: string | null;
+  /** Per-variant COGS override; null falls back to the product's base_cost. */
+  base_cost: number | null;
+  retail_price: number | null;
+  wholesale_price: number | null;
   stock_quantity: number;
   reorder_point: number;
   created_at: string;
   updated_at: string;
+}
+
+export interface StockUnit {
+  id: string;
+  variant_id: string;
+  bin_location: string;
+  status: StockUnitStatus;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+/** Row shape of the v_stock_units view — one physical piece, joined with variant/product. */
+export interface StockUnitWithDetails {
+  stock_unit_id: string;
+  bin_location: string;
+  status: StockUnitStatus;
+  notes: string | null;
+  created_at: string;
+  variant_id: string;
+  sku: string;
+  size: string;
+  color: string;
+  length: string | null;
+  style: string | null;
+  material: string | null;
+  retail_price: number | null;
+  wholesale_price: number | null;
+  base_cost: number;
+  product_id: string;
+  product_name: string;
+  category: string;
 }
 
 export interface VariantWithProduct extends Variant {
@@ -61,8 +105,11 @@ export interface Supplier {
 
 export interface Sale {
   id: string;
-  sale_date: string;
+  /** Null means the sale date wasn't recorded (shown as "Unknown"). */
+  sale_date: string | null;
   variant_id: string;
+  /** Optional link to the exact physical piece sold (stock_units). */
+  stock_unit_id: string | null;
   quantity: number;
   unit_price: number;
   channel: Channel;
@@ -77,14 +124,20 @@ export interface Sale {
 /** Row shape of the v_sales view — sales joined with variant/product + computed revenue/cogs/profit. */
 export interface SaleWithDetails {
   id: string;
-  sale_date: string;
+  sale_date: string | null;
   variant_id: string;
+  stock_unit_id: string | null;
   sku: string;
   size: string;
   color: string;
+  length: string | null;
+  style: string | null;
+  material: string | null;
   product_id: string;
   product_name: string;
   category: string;
+  /** Bin the physical unit was sold from, if known (from stock_units). */
+  sold_from: string | null;
   quantity: number;
   unit_price: number;
   channel: Channel;
@@ -157,6 +210,11 @@ export interface InventoryRow {
   sku: string;
   size: string;
   color: string;
+  length: string | null;
+  style: string | null;
+  material: string | null;
+  retail_price: number | null;
+  wholesale_price: number | null;
   stock_quantity: number;
   reorder_point: number;
   product_id: string;
@@ -167,7 +225,10 @@ export interface InventoryRow {
   low_stock: boolean;
 }
 
-export const CHANNELS: Channel[] = ["online", "in-store", "wholesale", "pop-up"];
+/** All channels the database accepts, including "unknown" (only ever set by historical imports). */
+export const CHANNELS: Channel[] = ["online", "in-store", "wholesale", "pop-up", "unknown"];
+/** Channels offered on the "Add sale" form — "unknown" is import-only and not a real choice going forward. */
+export const SALE_FORM_CHANNELS: Channel[] = ["online", "in-store", "wholesale", "pop-up"];
 
 export const EXPENSE_CATEGORIES: ExpenseCategory[] = [
   "materials",

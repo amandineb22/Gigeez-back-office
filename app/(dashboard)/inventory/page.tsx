@@ -1,16 +1,10 @@
-import { getInventory } from "@/lib/data/inventory";
+import { getInventory, getStockUnits } from "@/lib/data/inventory";
 import { getAllSales, getSalesInRange } from "@/lib/data/sales";
-import { parseDateRangeParams, formatCurrency, cn } from "@/lib/utils";
-import {
-  calculateInventoryValue,
-  lowStockItems,
-  findDeadStock,
-  sellThroughRate,
-} from "@/lib/calculations";
+import { parseDateRangeParams, formatCurrency } from "@/lib/utils";
+import { calculateInventoryValue, lowStockItems, findDeadStock } from "@/lib/calculations";
 import { Card } from "@/components/ui/Card";
-import { Badge } from "@/components/ui/Badge";
-import { Table, Thead, Th, Tr, Td } from "@/components/ui/Table";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { StockTable, type StockRow } from "@/components/inventory/StockTable";
 
 const DEAD_STOCK_THRESHOLD_DAYS = 60;
 
@@ -20,8 +14,9 @@ export default async function InventoryPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const range = parseDateRangeParams(await searchParams);
-  const [inventory, allSales, salesInRange] = await Promise.all([
+  const [inventory, stockUnits, allSales, salesInRange] = await Promise.all([
     getInventory(),
+    getStockUnits(),
     getAllSales(),
     getSalesInRange(range),
   ]);
@@ -31,7 +26,7 @@ export default async function InventoryPage({
 
   const lastSaleDateByVariant = new Map<string, string>();
   for (const s of allSales) {
-    if (s.is_refund) continue;
+    if (s.is_refund || !s.sale_date) continue;
     const existing = lastSaleDateByVariant.get(s.variant_id);
     if (!existing || s.sale_date > existing) lastSaleDateByVariant.set(s.variant_id, s.sale_date);
   }
@@ -43,6 +38,20 @@ export default async function InventoryPage({
     if (s.is_refund) continue;
     unitsSoldByVariant.set(s.variant_id, (unitsSoldByVariant.get(s.variant_id) ?? 0) + s.quantity);
   }
+
+  // Where each variant's physical pieces currently sit — own warehouse (WHSE)
+  // or a specific consignment boutique — so the Stock table can show exactly
+  // where every dress is, not just a total count.
+  const locationsByVariant = new Map<string, Record<string, number>>();
+  for (const su of stockUnits) {
+    const bucket = locationsByVariant.get(su.variant_id) ?? {};
+    bucket[su.bin_location] = (bucket[su.bin_location] ?? 0) + 1;
+    locationsByVariant.set(su.variant_id, bucket);
+  }
+  const stockRows: StockRow[] = inventory.map((row) => ({
+    ...row,
+    locations: locationsByVariant.get(row.variant_id) ?? {},
+  }));
 
   if (inventory.length === 0) {
     return (
@@ -57,7 +66,7 @@ export default async function InventoryPage({
 
   return (
     <div className="space-y-5">
-      <h1 className="font-display text-2xl text-ink">Inventory</h1>
+      <h1 className="font-display text-2xl text-ink">Stock</h1>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Card>
@@ -76,46 +85,7 @@ export default async function InventoryPage({
       </div>
 
       <Card className="p-0">
-        <Table>
-          <Thead>
-            <tr>
-              <Th>Product</Th>
-              <Th>SKU</Th>
-              <Th>Size / Color</Th>
-              <Th>Stock</Th>
-              <Th>Reorder pt.</Th>
-              <Th>Value</Th>
-              <Th>Sell-through (range)</Th>
-              <Th>Status</Th>
-            </tr>
-          </Thead>
-          <tbody>
-            {inventory.map((row) => {
-              const unitsSold = unitsSoldByVariant.get(row.variant_id) ?? 0;
-              const sellThrough = sellThroughRate(unitsSold, row.stock_quantity);
-              return (
-                <Tr key={row.variant_id}>
-                  <Td className="font-medium text-ink">{row.product_name}</Td>
-                  <Td className="font-mono text-xs text-ink/60">{row.sku}</Td>
-                  <Td>
-                    {row.size} / {row.color}
-                  </Td>
-                  <Td>{row.stock_quantity}</Td>
-                  <Td>{row.reorder_point}</Td>
-                  <Td>{formatCurrency(row.inventory_value)}</Td>
-                  <Td>{sellThrough.toFixed(0)}%</Td>
-                  <Td>
-                    <div className="flex flex-wrap gap-1">
-                      {row.low_stock && <Badge variant="warning">Low stock</Badge>}
-                      {deadStockIds.has(row.variant_id) && <Badge variant="danger">Dead stock</Badge>}
-                      {!row.low_stock && !deadStockIds.has(row.variant_id) && <Badge variant="success">Healthy</Badge>}
-                    </div>
-                  </Td>
-                </Tr>
-              );
-            })}
-          </tbody>
-        </Table>
+        <StockTable rows={stockRows} deadStockIds={deadStockIds} unitsSoldByVariant={unitsSoldByVariant} />
       </Card>
     </div>
   );

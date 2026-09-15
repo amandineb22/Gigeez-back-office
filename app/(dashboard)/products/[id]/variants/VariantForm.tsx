@@ -38,6 +38,18 @@ export function VariantForm({
         </FormField>
       </div>
 
+      <div className="grid grid-cols-3 gap-4">
+        <FormField label="Length" htmlFor="length" hint="Optional">
+          <Input id="length" name="length" defaultValue={defaultValues?.length ?? ""} placeholder="e.g. X" />
+        </FormField>
+        <FormField label="Style" htmlFor="style" hint="Optional">
+          <Input id="style" name="style" defaultValue={defaultValues?.style ?? ""} placeholder="e.g. BF" />
+        </FormField>
+        <FormField label="Material" htmlFor="material" hint="Optional">
+          <Input id="material" name="material" defaultValue={defaultValues?.material ?? ""} placeholder="e.g. VI" />
+        </FormField>
+      </div>
+
       <div className="grid grid-cols-2 gap-4">
         <FormField label="Stock on hand" htmlFor="stock_quantity">
           <Input
@@ -59,6 +71,39 @@ export function VariantForm({
             step={1}
             required
             defaultValue={defaultValues?.reorder_point ?? 5}
+          />
+        </FormField>
+      </div>
+
+      <div className="grid grid-cols-3 gap-4">
+        <FormField label="Base cost (COGS)" htmlFor="base_cost" hint="Optional — overrides the product's default">
+          <Input
+            id="base_cost"
+            name="base_cost"
+            type="number"
+            min={0}
+            step="0.01"
+            defaultValue={defaultValues?.base_cost ?? ""}
+          />
+        </FormField>
+        <FormField label="Retail price" htmlFor="retail_price" hint="Optional">
+          <Input
+            id="retail_price"
+            name="retail_price"
+            type="number"
+            min={0}
+            step="0.01"
+            defaultValue={defaultValues?.retail_price ?? ""}
+          />
+        </FormField>
+        <FormField label="Wholesale price" htmlFor="wholesale_price" hint="Optional">
+          <Input
+            id="wholesale_price"
+            name="wholesale_price"
+            type="number"
+            min={0}
+            step="0.01"
+            defaultValue={defaultValues?.wholesale_price ?? ""}
           />
         </FormField>
       </div>

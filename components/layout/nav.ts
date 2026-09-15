@@ -8,7 +8,7 @@ export const NAV_ITEMS: NavItem[] = [
   { label: "Sales", href: "/sales" },
   { label: "Expenses", href: "/expenses" },
   { label: "Products", href: "/products" },
-  { label: "Inventory", href: "/inventory" },
+  { label: "Stock", href: "/inventory" },
   { label: "Purchase Orders", href: "/purchase-orders" },
   { label: "Suppliers", href: "/suppliers" },
   { label: "Goals", href: "/goals" },

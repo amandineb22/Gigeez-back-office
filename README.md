@@ -65,6 +65,30 @@ Safe to run once against a fresh project. Re-running will insert duplicate
 sample rows (it doesn't check for existing data), so only run it once, or
 clear the tables first if you want to reseed.
 
+## 5b. Import the real Gigeez stock data
+
+`data/imports/2026-09-13-stock-import.json` is a cleaned-up snapshot of the
+"Gigeez Master data stock" spreadsheet (13 Sep 2026): every model becomes a
+product, every unique length/size/style/color/material combination becomes a
+variant/SKU, every physical piece still on hand becomes a stock unit (with
+its bin/location — own warehouse or a consignment boutique), and every piece
+already marked "sold" becomes a historical sale (shown with an "Unknown"
+date/channel badge in the Sales page, since the sheet didn't record those).
+
+```bash
+npm run import-stock
+```
+
+Run this instead of (or in addition to) `npm run seed` — it's independent of
+the sample data. It refuses to run twice against the same project (to avoid
+duplicating hundreds of physical pieces); pass `--force` if you really want
+to re-import.
+
+A handful of variants (see the script's console output, or search the JSON
+for `"price_estimated": true`) didn't have an exact price-tab match for
+their length, so their price was estimated from that model's other lengths —
+worth double-checking those SKUs in the Products page after import.
+
 ## 6. Deploy to Vercel
 
 1. Push this repo to GitHub/GitLab/Bitbucket.
@@ -127,6 +151,8 @@ components/
 theme/config.ts           Brand colors, font names, logo — see Rebranding
 supabase/schema.sql       Full schema, views, RLS policies
 scripts/seed.ts           Sample data generator
+scripts/import-stock.ts   One-time importer for the real Gigeez stock data
+data/imports/             Cleaned JSON snapshots consumed by import-stock.ts
 ```
 
 ## Notes on the data model

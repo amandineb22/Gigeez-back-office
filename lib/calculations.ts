@@ -335,6 +335,7 @@ export function buildProfitAndLoss(
   const map = new Map<string, Acc>();
 
   for (const s of sales) {
+    if (!s.sale_date) continue; // unknown-date historical sales aren't attributable to a period
     const { key, label, start } = periodKey(s.sale_date, grouping);
     const row = map.get(key) ?? { label, start, revenue: 0, cogs: 0, operatingExpenses: 0 };
     row.revenue += s.revenue;
@@ -412,6 +413,7 @@ export function buildCashFlow(
   const map = new Map<string, Acc>();
 
   for (const s of sales) {
+    if (!s.sale_date) continue; // unknown-date historical sales aren't attributable to a period
     const { key, label, start } = periodKey(s.sale_date, grouping);
     const row = map.get(key) ?? { label, start, cashIn: 0, cashOut: 0 };
     row.cashIn += s.revenue;
@@ -578,6 +580,7 @@ export function reconstructInventoryValueOverTime(
   const map = new Map<string, Acc>();
 
   for (const s of salesInRange) {
+    if (!s.sale_date) continue; // unknown-date historical sales aren't attributable to a period
     const { key, label, start } = periodKey(s.sale_date, grouping);
     const row = map.get(key) ?? { label, start, costIn: 0, costOut: 0 };
     row.costOut += s.cogs; // view already flips sign for refunds, so this nets out correctly
