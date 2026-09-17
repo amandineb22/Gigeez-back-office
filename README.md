@@ -89,6 +89,16 @@ for `"price_estimated": true`) didn't have an exact price-tab match for
 their length, so their price was estimated from that model's other lengths —
 worth double-checking those SKUs in the Products page after import.
 
+## 5c. Removing the sample data
+
+If you ran `npm run seed` earlier and now want the placeholder products,
+suppliers, and their fake sales/purchase orders gone (e.g. after importing
+the real Gigeez data), run
+[`supabase/cleanup-demo-data.sql`](supabase/cleanup-demo-data.sql) in the
+Supabase SQL Editor, the same way you ran `schema.sql`. It only deletes rows
+matching the seed script's exact sample product/supplier names, so your real
+data is never touched, and it's safe to run more than once.
+
 ## 6. Deploy to Vercel
 
 1. Push this repo to GitHub/GitLab/Bitbucket.
@@ -150,6 +160,7 @@ components/
   layout/                 Sidebar, top bar, global date-range filter
 theme/config.ts           Brand colors, font names, logo — see Rebranding
 supabase/schema.sql       Full schema, views, RLS policies
+supabase/cleanup-demo-data.sql  Deletes the sample data from npm run seed
 scripts/seed.ts           Sample data generator
 scripts/import-stock.ts   One-time importer for the real Gigeez stock data
 data/imports/             Cleaned JSON snapshots consumed by import-stock.ts
@@ -157,8 +168,8 @@ data/imports/             Cleaned JSON snapshots consumed by import-stock.ts
 
 ## Notes on the data model
 
-- Money amounts are stored as `numeric(10,2)` and always rendered as USD
-  (`$1,234.56`) via `formatCurrency()` in `lib/utils.ts`.
+- Money amounts are stored as `numeric(10,2)` and always rendered as QAR
+  (`QAR 1,234.56`) via `formatCurrency()` in `lib/utils.ts`.
 - Revenue, COGS, and profit are **not** stored on the `sales` table directly —
   they're computed by the `v_sales` Postgres view (joining sales → variants →
   products) so they can never drift out of sync with the underlying data.
