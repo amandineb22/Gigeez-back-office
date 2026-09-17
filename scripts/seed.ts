@@ -5,7 +5,8 @@
  *
  * Usage: npm run seed  (reads .env.local automatically via dotenv)
  */
-import "dotenv/config";
+import { config } from "dotenv";
+config({ path: ".env.local" });
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "../lib/supabase/database.types";
 

@@ -13,26 +13,28 @@ export function cn(...inputs: ClassValue[]) {
   return clsx(inputs);
 }
 
+// All prices in this business (from the Gigeez stock sheet) are in Qatari
+// Riyal, so money is formatted as QAR rather than USD throughout the app.
 const currencyFormatter = new Intl.NumberFormat("en-US", {
   style: "currency",
-  currency: "USD",
+  currency: "QAR",
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
 });
 
-/** Formats a number as USD, e.g. formatCurrency(1234.5) -> "$1,234.50" */
+/** Formats a number as QAR, e.g. formatCurrency(1234.5) -> "QAR 1,234.50" */
 export function formatCurrency(amount: number): string {
-  if (!Number.isFinite(amount)) return "$0.00";
+  if (!Number.isFinite(amount)) return currencyFormatter.format(0);
   return currencyFormatter.format(amount);
 }
 
-/** Compact currency for tight spaces like chart axes, e.g. "$12.3k" */
+/** Compact currency for tight spaces like chart axes, e.g. "QAR 12.3k" */
 export function formatCurrencyCompact(amount: number): string {
-  if (!Number.isFinite(amount)) return "$0";
+  if (!Number.isFinite(amount)) return "QAR 0";
   const abs = Math.abs(amount);
-  if (abs >= 1_000_000) return `$${(amount / 1_000_000).toFixed(1)}M`;
-  if (abs >= 1_000) return `$${(amount / 1_000).toFixed(1)}k`;
-  return `$${amount.toFixed(0)}`;
+  if (abs >= 1_000_000) return `QAR ${(amount / 1_000_000).toFixed(1)}M`;
+  if (abs >= 1_000) return `QAR ${(amount / 1_000).toFixed(1)}k`;
+  return `QAR ${amount.toFixed(0)}`;
 }
 
 export function formatPercent(value: number, digits = 1): string {
@@ -40,7 +42,9 @@ export function formatPercent(value: number, digits = 1): string {
   return `${value.toFixed(digits)}%`;
 }
 
-export function formatDate(dateStr: string, pattern = "MMM d, yyyy"): string {
+/** Formats an ISO date, or "Unknown" for sales imported without a recorded date. */
+export function formatDate(dateStr: string | null, pattern = "MMM d, yyyy"): string {
+  if (!dateStr) return "Unknown";
   try {
     return format(parseISO(dateStr), pattern);
   } catch {

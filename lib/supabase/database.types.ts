@@ -50,6 +50,12 @@ export interface Database {
           sku: string;
           size: string;
           color: string;
+          length: string | null;
+          style: string | null;
+          material: string | null;
+          base_cost: number | null;
+          retail_price: number | null;
+          wholesale_price: number | null;
           stock_quantity: number;
           reorder_point: number;
         } & Timestamps;
@@ -59,6 +65,12 @@ export interface Database {
           sku: string;
           size: string;
           color: string;
+          length?: string | null;
+          style?: string | null;
+          material?: string | null;
+          base_cost?: number | null;
+          retail_price?: number | null;
+          wholesale_price?: number | null;
           stock_quantity?: number;
           reorder_point?: number;
         };
@@ -69,6 +81,32 @@ export interface Database {
             columns: ["product_id"];
             isOneToOne: false;
             referencedRelation: "products";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      stock_units: {
+        Row: {
+          id: string;
+          variant_id: string;
+          bin_location: string;
+          status: "in_stock" | "sold";
+          notes: string | null;
+        } & Timestamps;
+        Insert: {
+          id?: string;
+          variant_id: string;
+          bin_location?: string;
+          status?: "in_stock" | "sold";
+          notes?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["stock_units"]["Insert"]>;
+        Relationships: [
+          {
+            foreignKeyName: "stock_units_variant_id_fkey";
+            columns: ["variant_id"];
+            isOneToOne: false;
+            referencedRelation: "variants";
             referencedColumns: ["id"];
           },
         ];
@@ -94,8 +132,9 @@ export interface Database {
       sales: {
         Row: {
           id: string;
-          sale_date: string;
+          sale_date: string | null;
           variant_id: string;
+          stock_unit_id: string | null;
           quantity: number;
           unit_price: number;
           channel: Channel;
@@ -106,8 +145,9 @@ export interface Database {
         } & Timestamps;
         Insert: {
           id?: string;
-          sale_date: string;
+          sale_date?: string | null;
           variant_id: string;
+          stock_unit_id?: string | null;
           quantity: number;
           unit_price: number;
           channel: Channel;
@@ -123,6 +163,13 @@ export interface Database {
             columns: ["variant_id"];
             isOneToOne: false;
             referencedRelation: "variants";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "sales_stock_unit_id_fkey";
+            columns: ["stock_unit_id"];
+            isOneToOne: false;
+            referencedRelation: "stock_units";
             referencedColumns: ["id"];
           },
         ];
@@ -229,14 +276,19 @@ export interface Database {
       v_sales: {
         Row: {
           id: string;
-          sale_date: string;
+          sale_date: string | null;
           variant_id: string;
+          stock_unit_id: string | null;
           sku: string;
           size: string;
           color: string;
+          length: string | null;
+          style: string | null;
+          material: string | null;
           product_id: string;
           product_name: string;
           category: string;
+          sold_from: string | null;
           quantity: number;
           unit_price: number;
           channel: Channel;
@@ -258,6 +310,11 @@ export interface Database {
           sku: string;
           size: string;
           color: string;
+          length: string | null;
+          style: string | null;
+          material: string | null;
+          retail_price: number | null;
+          wholesale_price: number | null;
           stock_quantity: number;
           reorder_point: number;
           product_id: string;
@@ -266,6 +323,29 @@ export interface Database {
           base_cost: number;
           inventory_value: number;
           low_stock: boolean;
+        };
+        Relationships: Relationship[];
+      };
+      v_stock_units: {
+        Row: {
+          stock_unit_id: string;
+          bin_location: string;
+          status: "in_stock" | "sold";
+          notes: string | null;
+          created_at: string;
+          variant_id: string;
+          sku: string;
+          size: string;
+          color: string;
+          length: string | null;
+          style: string | null;
+          material: string | null;
+          retail_price: number | null;
+          wholesale_price: number | null;
+          base_cost: number;
+          product_id: string;
+          product_name: string;
+          category: string;
         };
         Relationships: Relationship[];
       };
