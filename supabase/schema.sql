@@ -145,12 +145,10 @@ create table if not exists sales (
   updated_at timestamptz not null default now()
 );
 
-create index if not exists sales_variant_id_idx on sales (variant_id);
-create index if not exists sales_stock_unit_id_idx on sales (stock_unit_id);
-create index if not exists sales_sale_date_idx on sales (sale_date);
-create index if not exists sales_channel_idx on sales (channel);
-
--- Backfill for databases created before these changes existed.
+-- Backfill for databases created before these changes existed. Must run
+-- before the index/constraint statements below, since on an existing table
+-- "create table if not exists" is a no-op and those columns/constraints
+-- wouldn't exist yet otherwise.
 alter table sales alter column sale_date drop not null;
 alter table sales add column if not exists stock_unit_id uuid references stock_units (id) on delete set null;
 do $$
@@ -161,6 +159,11 @@ begin
   alter table sales add constraint sales_channel_check
     check (channel in ('online', 'in-store', 'wholesale', 'pop-up', 'unknown'));
 end $$;
+
+create index if not exists sales_variant_id_idx on sales (variant_id);
+create index if not exists sales_stock_unit_id_idx on sales (stock_unit_id);
+create index if not exists sales_sale_date_idx on sales (sale_date);
+create index if not exists sales_channel_idx on sales (channel);
 
 -- ----------------------------------------------------------------------------
 -- 5. expenses — one row per expense line
