@@ -13,7 +13,8 @@
  *        npm run import-stock -- --force   (re-run even if stock_units already has rows)
  *        npm run import-stock -- path/to/other-snapshot.json
  */
-import "dotenv/config";
+import { config } from "dotenv";
+config({ path: ".env.local" });
 import { readFileSync } from "fs";
 import { join } from "path";
 import { createClient } from "@supabase/supabase-js";
