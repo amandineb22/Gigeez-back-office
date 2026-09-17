@@ -29,16 +29,16 @@ export function StockTable({
   unitsSoldByVariant: Map<string, number>;
 }) {
   const [query, setQuery] = useState("");
-  const [category, setCategory] = useState<string>("all");
+  const [productName, setProductName] = useState<string>("all");
 
-  const categories = useMemo(() => {
-    const set = new Set(rows.map((r) => r.category));
+  const productNames = useMemo(() => {
+    const set = new Set(rows.map((r) => r.product_name));
     return ["all", ...Array.from(set).sort()];
   }, [rows]);
 
   const filtered = useMemo(() => {
     let result = rows;
-    if (category !== "all") result = result.filter((r) => r.category === category);
+    if (productName !== "all") result = result.filter((r) => r.product_name === productName);
     const q = query.trim().toLowerCase();
     if (q) {
       result = result.filter(
@@ -49,7 +49,7 @@ export function StockTable({
       );
     }
     return result;
-  }, [rows, category, query]);
+  }, [rows, productName, query]);
 
   return (
     <div className="space-y-3">
@@ -62,16 +62,16 @@ export function StockTable({
           className="w-full max-w-sm rounded-md border border-ink/10 bg-white px-3 py-1.5 text-sm text-ink placeholder:text-ink/40 focus:border-brand-400 focus:outline-none focus:ring-1 focus:ring-brand-400"
         />
         <div className="flex flex-wrap gap-1.5">
-          {categories.map((c) => (
+          {productNames.map((name) => (
             <button
-              key={c}
+              key={name}
               type="button"
-              onClick={() => setCategory(c)}
+              onClick={() => setProductName(name)}
               className={`rounded-full px-3 py-1 text-xs font-medium transition-editorial ${
-                category === c ? "bg-ink text-white" : "bg-ink/5 text-ink/60 hover:bg-ink/10"
+                productName === name ? "bg-ink text-white" : "bg-ink/5 text-ink/60 hover:bg-ink/10"
               }`}
             >
-              {c === "all" ? "All" : c}
+              {name === "all" ? "All" : name}
             </button>
           ))}
         </div>
@@ -82,7 +82,7 @@ export function StockTable({
 
       {filtered.length === 0 ? (
         <div className="p-5 pt-0">
-          <EmptyState title="No matching stock" description="Try a different search term or category." />
+          <EmptyState title="No matching stock" description="Try a different search term or product filter." />
         </div>
       ) : (
         <Table>

@@ -8,18 +8,30 @@ import { StockTable, type StockRow } from "@/components/inventory/StockTable";
 
 const DEAD_STOCK_THRESHOLD_DAYS = 60;
 
+// Sample/demo products from the app's seed script (npm run seed) — not part
+// of the real Gigeez stock sheet. Hidden here rather than deleted, so
+// nothing is lost if a database still has them.
+const DEMO_PRODUCT_NAMES = new Set([
+  "Linen Wrap Dress",
+  "Organic Cotton Tee",
+  "Tailored Wool Trousers",
+  "Quilted Field Jacket",
+  "Woven Leather Belt",
+]);
+
 export default async function InventoryPage({
   searchParams,
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const range = parseDateRangeParams(await searchParams);
-  const [inventory, stockUnits, allSales, salesInRange] = await Promise.all([
+  const [inventoryRaw, stockUnits, allSales, salesInRange] = await Promise.all([
     getInventory(),
     getStockUnits(),
     getAllSales(),
     getSalesInRange(range),
   ]);
+  const inventory = inventoryRaw.filter((row) => !DEMO_PRODUCT_NAMES.has(row.product_name));
 
   const inventoryValue = calculateInventoryValue(inventory);
   const lowStock = lowStockItems(inventory);

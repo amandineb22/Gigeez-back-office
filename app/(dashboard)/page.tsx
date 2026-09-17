@@ -1,4 +1,4 @@
-import { getSalesInRange } from "@/lib/data/sales";
+import { getSalesInRange, getAllSales } from "@/lib/data/sales";
 import { getExpensesInRange } from "@/lib/data/expenses";
 import { getInventory } from "@/lib/data/inventory";
 import { getReceivedPOsInRange } from "@/lib/data/purchaseOrders";
@@ -51,7 +51,7 @@ export default async function DashboardHomePage({
   const yoyRange = getYoYPeriod(range);
   const grouping = pickChartGrouping(range);
 
-  const [salesCurrent, salesPrevious, salesYoy, expensesCurrent, inventory, receivedPOs, goals] =
+  const [salesCurrent, salesPrevious, salesYoy, expensesCurrent, inventory, receivedPOs, goals, allTimeSales] =
     await Promise.all([
       getSalesInRange(range),
       getSalesInRange(previousRange),
@@ -60,7 +60,17 @@ export default async function DashboardHomePage({
       getInventory(),
       getReceivedPOsInRange(range),
       getAllGoals(),
+      getAllSales(),
     ]);
+
+  // Lifetime totals, independent of the date-range filter above — includes
+  // historical sales with an unknown date (e.g. imported stock already
+  // marked "sold") that period-based KPIs intentionally exclude, since they
+  // can't be attributed to a specific period.
+  const allTimeRevenue = sumRevenue(allTimeSales);
+  const allTimeProfit = sumProfit(allTimeSales);
+  const allTimeOrders = countOrders(allTimeSales);
+  const allTimeAov = averageOrderValue(allTimeSales);
 
   const kpis = calculateKpiSummary(salesCurrent, salesPrevious, salesYoy);
   const channelData = revenueByChannel(salesCurrent);
@@ -104,7 +114,7 @@ export default async function DashboardHomePage({
     })
   );
 
-  if (salesCurrent.length === 0 && expensesCurrent.length === 0) {
+  if (salesCurrent.length === 0 && expensesCurrent.length === 0 && allTimeSales.length === 0) {
     return (
       <EmptyState
         title="No data in this range yet"
@@ -123,6 +133,34 @@ export default async function DashboardHomePage({
         <KpiCard label="Orders" trend={kpis.orderCount} format="number" />
         <KpiCard label="Avg. order value" trend={kpis.aov} />
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>All-time</CardTitle>
+        </CardHeader>
+        <p className="-mt-4 mb-4 text-xs text-ink/40">
+          Every sale ever recorded, including historical pieces with an unknown sale date — unlike the cards above,
+          this isn&rsquo;t affected by the date range at the top of the page.
+        </p>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide text-ink/40">Revenue</p>
+            <p className="mt-2 font-display text-2xl text-ink">{formatCurrency(allTimeRevenue)}</p>
+          </div>
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide text-ink/40">Profit</p>
+            <p className="mt-2 font-display text-2xl text-ink">{formatCurrency(allTimeProfit)}</p>
+          </div>
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide text-ink/40">Orders</p>
+            <p className="mt-2 font-display text-2xl text-ink">{allTimeOrders.toLocaleString()}</p>
+          </div>
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wide text-ink/40">Avg. order value</p>
+            <p className="mt-2 font-display text-2xl text-ink">{formatCurrency(allTimeAov)}</p>
+          </div>
+        </div>
+      </Card>
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
         <Card>
