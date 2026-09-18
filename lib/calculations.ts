@@ -184,6 +184,89 @@ export function calculateKpiSummary(
   };
 }
 
+/** The spreadsheet months whose month falls inside a date range. */
+export function financialMonthsInRange(months: FinancialMonth[], range: DateRange): FinancialMonth[] {
+  return months.filter((m) => m.month >= range.from && m.month <= range.to);
+}
+
+/**
+ * The same months shifted back by `monthsBack`, for a like-for-like comparison.
+ *
+ * The date-range version of "the previous period" is a window of days, which
+ * lines up badly with a monthly sheet: a range of 1–18 September has a
+ * previous period of mid-to-late August and so picks up no month at all.
+ * Comparing September against August, and against September last year, is
+ * what someone reading the cards actually means.
+ */
+export function shiftFinancialMonths(
+  all: FinancialMonth[],
+  current: FinancialMonth[],
+  monthsBack: number
+): FinancialMonth[] {
+  if (current.length === 0) return [];
+  const byMonth = new Map(all.map((m) => [m.month.slice(0, 7), m]));
+  const shifted: FinancialMonth[] = [];
+  for (const m of current) {
+    const key = format(addMonths(parseISO(m.month), -monthsBack), "yyyy-MM");
+    const found = byMonth.get(key);
+    if (found) shifted.push(found);
+  }
+  return shifted;
+}
+
+/**
+ * The same four headline cards, built from the profit-and-loss spreadsheet
+ * instead of from individual sales.
+ *
+ * Used whenever the sheet covers the selected range, because it records every
+ * sale while `sales` holds only the pieces the stock sheet happened to capture
+ * — and none of those carry a date. Two of the cards mean something slightly
+ * different here and the dashboard relabels them: the sheet counts dresses
+ * rather than orders, so "orders" is a dress count and "aov" is the average
+ * price a dress went out at. Profit is revenue less all four cost bands, the
+ * same cash net shown in the financials section.
+ */
+export function calculateSpreadsheetKpiSummary(
+  current: FinancialMonth[],
+  previousPeriod: FinancialMonth[] | null,
+  yoy: FinancialMonth[] | null
+): KpiSummary {
+  const revenueOf = (months: FinancialMonth[]) => months.reduce((t, m) => t + m.revenue, 0);
+  const unitsOf = (months: FinancialMonth[]) => months.reduce((t, m) => t + m.units, 0);
+  const profitOf = (months: FinancialMonth[]) =>
+    months.reduce(
+      (t, m) => t + m.revenue - (m.cost_production + m.cost_commercial + m.cost_marketing + m.cost_admin),
+      0
+    );
+  const perUnitOf = (months: FinancialMonth[]) => {
+    const units = unitsOf(months);
+    return units === 0 ? 0 : revenueOf(months) / units;
+  };
+
+  return {
+    revenue: buildKpiTrend(
+      revenueOf(current),
+      previousPeriod ? revenueOf(previousPeriod) : null,
+      yoy ? revenueOf(yoy) : null
+    ),
+    profit: buildKpiTrend(
+      profitOf(current),
+      previousPeriod ? profitOf(previousPeriod) : null,
+      yoy ? profitOf(yoy) : null
+    ),
+    orderCount: buildKpiTrend(
+      unitsOf(current),
+      previousPeriod ? unitsOf(previousPeriod) : null,
+      yoy ? unitsOf(yoy) : null
+    ),
+    aov: buildKpiTrend(
+      perUnitOf(current),
+      previousPeriod ? perUnitOf(previousPeriod) : null,
+      yoy ? perUnitOf(yoy) : null
+    ),
+  };
+}
+
 // ============================================================================
 // Section 4 — breakdowns (by channel, by category, best/worst products)
 // ============================================================================

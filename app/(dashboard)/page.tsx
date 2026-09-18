@@ -14,6 +14,9 @@ import {
 } from "@/lib/utils";
 import {
   calculateKpiSummary,
+  calculateSpreadsheetKpiSummary,
+  financialMonthsInRange,
+  shiftFinancialMonths,
   revenueByChannel,
   revenueByCategory,
   bestAndWorstProducts,
@@ -115,7 +118,27 @@ export default async function DashboardHomePage({
   const allTimeOrders = countOrders(allTimeSales);
   const allTimeAov = averageOrderValue(allTimeSales);
 
-  const kpis = calculateKpiSummary(salesCurrent, salesPrevious, salesYoy);
+  // The headline cards and the two trend charts come from the spreadsheet for
+  // any range it covers. `sales` holds only the pieces the stock sheet
+  // captured, none of them dated, so on its own it leaves this page blank —
+  // the sheet, by contrast, records every month in full.
+  const fmCurrent = financialMonthsInRange(financialMonths, range);
+  // Compared month for month rather than by date window, so a part-month range
+  // still has something to compare against. See shiftFinancialMonths.
+  const fmPrevious = shiftFinancialMonths(financialMonths, fmCurrent, fmCurrent.length);
+  const fmYoy = shiftFinancialMonths(financialMonths, fmCurrent, 12);
+  const kpisFromSheet = fmCurrent.length > 0;
+  // A month can have sales recorded before its costs are. Profit then equals
+  // revenue, which would read as a perfect margin if left unexplained.
+  const sheetCostsMissing =
+    kpisFromSheet &&
+    fmCurrent.every(
+      (m) => m.cost_production + m.cost_commercial + m.cost_marketing + m.cost_admin === 0
+    );
+
+  const kpis = kpisFromSheet
+    ? calculateSpreadsheetKpiSummary(fmCurrent, fmPrevious.length ? fmPrevious : null, fmYoy.length ? fmYoy : null)
+    : calculateKpiSummary(salesCurrent, salesPrevious, salesYoy);
   const channelData = revenueByChannel(salesCurrent);
   const categoryData = revenueByCategory(salesCurrent);
   const { best, worst } = bestAndWorstProducts(salesCurrent, 5);
@@ -124,17 +147,40 @@ export default async function DashboardHomePage({
   const inventoryValue = calculateInventoryValue(inventory);
   const lowStock = lowStockItems(inventory);
 
-  const pnlRows = buildProfitAndLoss(salesCurrent, expensesCurrent, grouping);
+  // The sheet is a monthly record, so charting it by day or week would invent
+  // detail it does not have.
+  const chartGrouping = kpisFromSheet ? "month" : grouping;
+  const pnlRows = buildProfitAndLoss(salesCurrent, expensesCurrent, chartGrouping, fmCurrent);
   const revenueSeries = pnlRows.map((r) => ({ periodLabel: r.periodLabel, revenue: r.revenue, profit: r.grossProfit }));
   const profitSeries = pnlRows.map((r) => ({ periodLabel: r.periodLabel, netProfit: r.netProfit }));
   const inventorySeries = reconstructInventoryValueOverTime(inventoryValue, salesCurrent, receivedPOs, grouping);
 
-  const expensePie = Array.from(
+  const expensePieFromRows = Array.from(
     expensesCurrent.reduce((map, e) => {
       map.set(e.category, (map.get(e.category) ?? 0) + e.amount);
       return map;
     }, new Map<string, number>())
   ).map(([category, amount]) => ({ category, amount }));
+
+  // The sheet splits costs into its own four bands rather than by category, so
+  // fall back to those when the range holds no expense rows — a month the
+  // sheet covers for revenue but whose individual cost lines aren't in yet.
+  const expensePieFromSheet = [
+    { category: "production", amount: fmCurrent.reduce((t, m) => t + m.cost_production, 0) },
+    { category: "commercial", amount: fmCurrent.reduce((t, m) => t + m.cost_commercial, 0) },
+    { category: "marketing", amount: fmCurrent.reduce((t, m) => t + m.cost_marketing, 0) },
+    { category: "admin", amount: fmCurrent.reduce((t, m) => t + m.cost_admin, 0) },
+  ].filter((slice) => slice.amount > 0);
+
+  const expensePie = expensePieFromRows.length > 0 ? expensePieFromRows : expensePieFromSheet;
+  const expensePieFromBands = expensePieFromRows.length === 0 && expensePieFromSheet.length > 0;
+
+  // Channel, category, refund rate and break-even can only come from
+  // individual sales, which the spreadsheet has no equivalent of. Say that,
+  // rather than "no sales", on a page that is otherwise showing revenue.
+  const noPieceDataMessage = kpisFromSheet
+    ? "Needs individual sales, which your profit and loss sheet doesn't break down."
+    : "No sales in this range yet.";
 
   const todayIso = new Date().toISOString().slice(0, 10);
   const activeGoals = goals.filter((g) => {
@@ -175,11 +221,34 @@ export default async function DashboardHomePage({
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <KpiCard label="Revenue" trend={kpis.revenue} currency={currency} />
-        <KpiCard label="Profit" trend={kpis.profit} currency={currency} />
-        <KpiCard label="Orders" trend={kpis.orderCount} format="number" />
-        <KpiCard label="Avg. order value" trend={kpis.aov} currency={currency} />
+      <div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <KpiCard label="Revenue" trend={kpis.revenue} currency={currency} />
+          <KpiCard label="Profit" trend={kpis.profit} currency={currency} />
+          <KpiCard
+            label={kpisFromSheet ? "Dresses sold" : "Orders"}
+            trend={kpis.orderCount}
+            format="number"
+          />
+          <KpiCard
+            label={kpisFromSheet ? "Avg. price per dress" : "Avg. order value"}
+            trend={kpis.aov}
+            currency={currency}
+          />
+        </div>
+        {kpisFromSheet && (
+          <p className="mt-2.5 text-xs text-ink/40">
+            From your profit and loss sheet, which records every sale. Profit is revenue less all four cost bands —
+            the same cash net shown below. Compared against the month before and the same month last year, wherever
+            the sheet covers them.
+          </p>
+        )}
+        {sheetCostsMissing && (
+          <p className="mt-1.5 text-xs text-amber-700">
+            Your sheet has no costs recorded for this period yet, so profit here is the same as revenue. Add them to
+            the sheet and re-import, or widen the date range, to see a real margin.
+          </p>
+        )}
       </div>
 
       <Card>
@@ -246,6 +315,9 @@ export default async function DashboardHomePage({
         <Card>
           <p className="text-xs font-medium uppercase tracking-wide text-ink/40">Refund rate</p>
           <p className="mt-2 font-display text-2xl text-ink">{formatPercent(refundRate)}</p>
+          {kpisFromSheet && (
+            <p className="mt-1 text-xs text-ink/40">From individual sales, which are still incomplete.</p>
+          )}
         </Card>
         <Card>
           <p className="text-xs font-medium uppercase tracking-wide text-ink/40">Break-even point</p>
@@ -255,7 +327,9 @@ export default async function DashboardHomePage({
           <p className="mt-1 text-xs text-ink/40">
             {breakEven.breakEvenRevenue
               ? formatCurrency(breakEven.breakEvenRevenue, currency)
-              : "Not reachable at current margins"}
+              : kpisFromSheet
+                ? "Needs a per-dress margin, which the sheet doesn't break down."
+                : "Not reachable at current margins"}
           </p>
         </Card>
         <Card>
@@ -282,6 +356,12 @@ export default async function DashboardHomePage({
           <CardHeader>
             <CardTitle>Expense breakdown</CardTitle>
           </CardHeader>
+          {expensePieFromBands && (
+            <p className="-mt-4 mb-4 text-xs text-ink/40">
+              Your profit and loss sheet&rsquo;s four cost bands. The individual cost lines for this range
+              aren&rsquo;t in the sheet yet.
+            </p>
+          )}
           {expensePie.length > 0 ? (
             <ExpensePieChart data={expensePie} />
           ) : (
@@ -318,7 +398,7 @@ export default async function DashboardHomePage({
           {channelData.length > 0 ? (
             <ChannelBarChart data={channelData} />
           ) : (
-            <p className="py-10 text-center text-sm text-ink/40">No sales in this range yet.</p>
+            <p className="py-10 text-center text-sm text-ink/40">{noPieceDataMessage}</p>
           )}
         </Card>
         <Card>
@@ -326,7 +406,7 @@ export default async function DashboardHomePage({
             <CardTitle>Revenue by category</CardTitle>
           </CardHeader>
           {categoryData.length === 0 ? (
-            <p className="py-10 text-center text-sm text-ink/40">No sales in this range yet.</p>
+            <p className="py-10 text-center text-sm text-ink/40">{noPieceDataMessage}</p>
           ) : (
             <ul className="space-y-2.5">
               {categoryData.map((c) => (
