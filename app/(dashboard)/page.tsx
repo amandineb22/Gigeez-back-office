@@ -255,10 +255,17 @@ export default async function DashboardHomePage({
         <CardHeader>
           <CardTitle>All-time</CardTitle>
         </CardHeader>
-        <p className="-mt-4 mb-4 text-xs text-ink/40">
+        <p className="-mt-4 mb-2 text-xs text-ink/40">
           Every sale ever recorded, including historical pieces with an unknown sale date — unlike the cards above,
           this isn&rsquo;t affected by the date range at the top of the page.
         </p>
+        {undatedSalesCount > 0 && (
+          <p className="mb-4 text-xs text-amber-700">
+            Read these as a rough guide, not as money earned. They come from the sales list, which recorded each
+            dress at its tag price rather than what it actually sold for, so the amounts read high. The cards above
+            use your profit and loss sheet instead.
+          </p>
+        )}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <div>
             <p className="text-xs font-medium uppercase tracking-wide text-ink/40">Revenue</p>
