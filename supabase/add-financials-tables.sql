@@ -113,6 +113,22 @@ begin
 end $$;
 
 -- ----------------------------------------------------------------------------
+-- Allow a negative expense amount.
+--
+-- The profit and loss sheet nets credits against a month's costs — an advance
+-- paid by a customer, a refund from a supplier — so those lines have to import
+-- as negative amounts for a month's expenses to add up to the same total the
+-- sheet shows. Without this, October 2025 reads about 2,457 too high. The
+-- add-expense form still refuses a negative, so only the importer creates one.
+-- ----------------------------------------------------------------------------
+do $$
+begin
+  if exists (select 1 from pg_constraint where conname = 'expenses_amount_check') then
+    alter table expenses drop constraint expenses_amount_check;
+  end if;
+end $$;
+
+-- ----------------------------------------------------------------------------
 -- Keep updated_at current, the same way every other table does.
 -- ----------------------------------------------------------------------------
 do $$

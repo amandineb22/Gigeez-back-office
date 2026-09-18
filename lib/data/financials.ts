@@ -1,6 +1,7 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import type { BpTarget, FinancialMonth, HistoricYear } from "@/lib/types";
+import type { DateRange } from "@/lib/utils";
 
 /** Postgres "relation does not exist". */
 const UNDEFINED_TABLE = "42P01";
@@ -50,6 +51,27 @@ export async function getFinancialMonthsForYear(year: number): Promise<Financial
     .select("*")
     .gte("month", `${year}-01-01`)
     .lte("month", `${year}-12-31`)
+    .order("month", { ascending: true });
+
+  return emptyIfTableMissing(error, "financial_months", data);
+}
+
+/**
+ * The spreadsheet months falling inside a date range, oldest first.
+ *
+ * A month row is dated the 1st, and it is included when that 1st falls inside
+ * the range — so a range covering whole months or whole years picks up exactly
+ * those months. A range starting mid-month leaves that month out rather than
+ * counting a whole month's revenue against part of it: the sheet records the
+ * month as a single figure and cannot be split across a part-month.
+ */
+export async function getFinancialMonthsInRange(range: DateRange): Promise<FinancialMonth[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("financial_months")
+    .select("*")
+    .gte("month", range.from)
+    .lte("month", range.to)
     .order("month", { ascending: true });
 
   return emptyIfTableMissing(error, "financial_months", data);

@@ -165,11 +165,11 @@ async function main() {
     console.log(`${rows.length} expense lines upserted into expenses (hand-entered rows untouched).`);
   }
 
+  // Any line the snapshot could not turn into an expense row. Reported rather
+  // than dropped quietly, so a month that stops adding up to the sheet is
+  // visible here instead of only on screen.
   for (const s of raw.expenses_skipped ?? []) {
-    console.log(
-      `Skipped ${s.month} "${s.label}" (${s.amount}): the expenses table only accepts ` +
-        "amounts of zero or more, and this is money in rather than money out."
-    );
+    console.log(`Skipped ${s.month} "${s.label}" (${s.amount}) — this month will not match the sheet's total.`);
   }
 
   console.log("Done. Sales and stock were not touched.");

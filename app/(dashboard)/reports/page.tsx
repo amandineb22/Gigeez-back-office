@@ -1,6 +1,7 @@
 import { differenceInCalendarDays, parseISO } from "date-fns";
 import { getSalesInRange, countUndatedSales } from "@/lib/data/sales";
 import { getExpensesInRange } from "@/lib/data/expenses";
+import { getFinancialMonthsInRange } from "@/lib/data/financials";
 import {
   buildProfitAndLoss,
   buildCashFlow,
@@ -29,21 +30,26 @@ export default async function ReportsPage({
   const grouping = (["month", "quarter", "year"].includes(String(sp.grouping)) ? sp.grouping : "month") as PnLGrouping;
   const cashOnHand = Number(sp.cash ?? 0) || 0;
 
-  const [sales, expenses, undatedSalesCount] = await Promise.all([
+  const [sales, expenses, financialMonths, undatedSalesCount] = await Promise.all([
     getSalesInRange(range),
     getExpensesInRange(range),
+    getFinancialMonthsInRange(range),
     countUndatedSales(),
   ]);
 
-  const pnlRows = buildProfitAndLoss(sales, expenses, grouping);
-  const cashFlowRows = buildCashFlow(sales, expenses, grouping, cashOnHand);
+  // Revenue and costs come from the profit and loss sheet for every month it
+  // covers — it is the complete record, where `sales` only holds the pieces
+  // the stock sheet happened to capture. buildProfitAndLoss leaves the
+  // piece-level rows out of those months so nothing is counted twice.
+  const pnlRows = buildProfitAndLoss(sales, expenses, grouping, financialMonths);
+  const cashFlowRows = buildCashFlow(sales, expenses, grouping, cashOnHand, financialMonths);
   const productProfit = profitPerProduct(sales);
 
   const monthsInRange = Math.max(differenceInCalendarDays(parseISO(range.to), parseISO(range.from)) / 30.44, 1 / 30.44);
   const avgMonthlyExpenses = sumExpenses(expenses) / monthsInRange;
   const runway = calculateRunway(cashOnHand, avgMonthlyExpenses);
 
-  const hasData = sales.length > 0 || expenses.length > 0;
+  const hasData = sales.length > 0 || expenses.length > 0 || financialMonths.length > 0;
 
   return (
     <div className="space-y-5">
@@ -58,7 +64,7 @@ export default async function ReportsPage({
         </LinkButton>
       </div>
 
-      <UndatedSalesNotice undatedSalesCount={undatedSalesCount} />
+      <UndatedSalesNotice undatedSalesCount={undatedSalesCount} spreadsheetMonths={financialMonths.length} />
 
       <Card>
         <ReportControls grouping={grouping} cashOnHand={cashOnHand} />
@@ -76,6 +82,12 @@ export default async function ReportsPage({
               <CardHeader>
                 <CardTitle>Profit &amp; loss</CardTitle>
               </CardHeader>
+              <p className="-mt-3 mb-4 text-xs text-ink/40">
+                For every month your profit and loss sheet covers, revenue and costs come from that sheet. COGS is
+                its production band, which is cash paid on production that month rather than the cost of the pieces
+                sold, so gross margin moves around with when you buy. Net profit is the same figure as cash net on
+                the dashboard.
+              </p>
             </div>
             <Table>
               <Thead>
@@ -156,6 +168,11 @@ export default async function ReportsPage({
               <CardHeader>
                 <CardTitle>Profit per product</CardTitle>
               </CardHeader>
+              <p className="-mt-3 mb-4 text-xs text-ink/40">
+                Built from individual sales rather than the profit and loss sheet, which has no per-style breakdown.
+                It covers only the pieces recorded in stock, so read it as a ranking of which styles earn rather
+                than a total for the business.
+              </p>
             </div>
             <Table>
               <Thead>

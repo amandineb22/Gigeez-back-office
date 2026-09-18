@@ -269,7 +269,7 @@
       "amount": 2619.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "TEXTILE SAREE PURCHASE \u00b7 from the profit and loss sheet (production)"
+      "notes": "TEXTILE SAREE PURCHASE · from the profit and loss sheet (production)"
     },
     {
       "source_ref": "pnl:2025-10-01:textile-saree-purchase",
@@ -278,7 +278,7 @@
       "amount": 5464.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "TEXTILE SAREE PURCHASE \u00b7 from the profit and loss sheet (production)"
+      "notes": "TEXTILE SAREE PURCHASE · from the profit and loss sheet (production)"
     },
     {
       "source_ref": "pnl:2026-01-01:textile-saree-purchase",
@@ -287,7 +287,7 @@
       "amount": 1192.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "TEXTILE SAREE PURCHASE \u00b7 from the profit and loss sheet (production)"
+      "notes": "TEXTILE SAREE PURCHASE · from the profit and loss sheet (production)"
     },
     {
       "source_ref": "pnl:2026-02-01:textile-saree-purchase",
@@ -296,7 +296,7 @@
       "amount": 1015.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "TEXTILE SAREE PURCHASE \u00b7 from the profit and loss sheet (production)"
+      "notes": "TEXTILE SAREE PURCHASE · from the profit and loss sheet (production)"
     },
     {
       "source_ref": "pnl:2026-04-01:textile-saree-purchase",
@@ -305,7 +305,7 @@
       "amount": 1797.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "TEXTILE SAREE PURCHASE \u00b7 from the profit and loss sheet (production)"
+      "notes": "TEXTILE SAREE PURCHASE · from the profit and loss sheet (production)"
     },
     {
       "source_ref": "pnl:2026-08-01:textile-saree-purchase",
@@ -314,7 +314,7 @@
       "amount": 2730.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "TEXTILE SAREE PURCHASE \u00b7 from the profit and loss sheet (production)"
+      "notes": "TEXTILE SAREE PURCHASE · from the profit and loss sheet (production)"
     },
     {
       "source_ref": "pnl:2025-04-01:textile-silk-for-slip-dress-purchase",
@@ -323,7 +323,7 @@
       "amount": 655.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "TEXTILE SILK FOR SLIP DRESS PURCHASE \u00b7 from the profit and loss sheet (production)"
+      "notes": "TEXTILE SILK FOR SLIP DRESS PURCHASE · from the profit and loss sheet (production)"
     },
     {
       "source_ref": "pnl:2025-06-01:textile-silk-for-slip-dress-purchase",
@@ -332,7 +332,7 @@
       "amount": 342.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "TEXTILE SILK FOR SLIP DRESS PURCHASE \u00b7 from the profit and loss sheet (production)"
+      "notes": "TEXTILE SILK FOR SLIP DRESS PURCHASE · from the profit and loss sheet (production)"
     },
     {
       "source_ref": "pnl:2025-09-01:textile-silk-for-slip-dress-purchase",
@@ -341,7 +341,7 @@
       "amount": 783.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "TEXTILE SILK FOR SLIP DRESS PURCHASE \u00b7 from the profit and loss sheet (production)"
+      "notes": "TEXTILE SILK FOR SLIP DRESS PURCHASE · from the profit and loss sheet (production)"
     },
     {
       "source_ref": "pnl:2025-10-01:textile-silk-for-slip-dress-purchase",
@@ -350,7 +350,7 @@
       "amount": 480.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "TEXTILE SILK FOR SLIP DRESS PURCHASE \u00b7 from the profit and loss sheet (production)"
+      "notes": "TEXTILE SILK FOR SLIP DRESS PURCHASE · from the profit and loss sheet (production)"
     },
     {
       "source_ref": "pnl:2026-04-01:textile-silk-for-slip-dress-purchase",
@@ -359,7 +359,7 @@
       "amount": 1155.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "TEXTILE SILK FOR SLIP DRESS PURCHASE \u00b7 from the profit and loss sheet (production)"
+      "notes": "TEXTILE SILK FOR SLIP DRESS PURCHASE · from the profit and loss sheet (production)"
     },
     {
       "source_ref": "pnl:2026-06-01:textile-silk-for-slip-dress-purchase",
@@ -368,7 +368,7 @@
       "amount": 667.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "TEXTILE SILK FOR SLIP DRESS PURCHASE \u00b7 from the profit and loss sheet (production)"
+      "notes": "TEXTILE SILK FOR SLIP DRESS PURCHASE · from the profit and loss sheet (production)"
     },
     {
       "source_ref": "pnl:2025-04-01:jewelry-purchase",
@@ -377,7 +377,7 @@
       "amount": 1601.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "JEWELRY PURCHASE \u00b7 from the profit and loss sheet (production)"
+      "notes": "JEWELRY PURCHASE · from the profit and loss sheet (production)"
     },
     {
       "source_ref": "pnl:2025-05-01:jewelry-purchase",
@@ -386,7 +386,7 @@
       "amount": 438.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "JEWELRY PURCHASE \u00b7 from the profit and loss sheet (production)"
+      "notes": "JEWELRY PURCHASE · from the profit and loss sheet (production)"
     },
     {
       "source_ref": "pnl:2025-07-01:jewelry-purchase",
@@ -395,7 +395,7 @@
       "amount": 382.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "JEWELRY PURCHASE \u00b7 from the profit and loss sheet (production)"
+      "notes": "JEWELRY PURCHASE · from the profit and loss sheet (production)"
     },
     {
       "source_ref": "pnl:2025-09-01:jewelry-purchase",
@@ -404,7 +404,7 @@
       "amount": 268.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "JEWELRY PURCHASE \u00b7 from the profit and loss sheet (production)"
+      "notes": "JEWELRY PURCHASE · from the profit and loss sheet (production)"
     },
     {
       "source_ref": "pnl:2025-04-01:material-shipping-cost-dhl",
@@ -413,7 +413,7 @@
       "amount": 729.0,
       "cost_type": "variable",
       "vendor": "DHL",
-      "notes": "MATERIAL SHIPPING COST/ DHL \u00b7 from the profit and loss sheet (production)"
+      "notes": "MATERIAL SHIPPING COST/ DHL · from the profit and loss sheet (production)"
     },
     {
       "source_ref": "pnl:2025-05-01:material-shipping-cost-dhl",
@@ -422,7 +422,7 @@
       "amount": 1297.38,
       "cost_type": "variable",
       "vendor": "DHL",
-      "notes": "MATERIAL SHIPPING COST/ DHL \u00b7 from the profit and loss sheet (production)"
+      "notes": "MATERIAL SHIPPING COST/ DHL · from the profit and loss sheet (production)"
     },
     {
       "source_ref": "pnl:2025-09-01:material-shipping-cost-dhl",
@@ -431,7 +431,7 @@
       "amount": 583.0,
       "cost_type": "variable",
       "vendor": "DHL",
-      "notes": "MATERIAL SHIPPING COST/ DHL \u00b7 from the profit and loss sheet (production)"
+      "notes": "MATERIAL SHIPPING COST/ DHL · from the profit and loss sheet (production)"
     },
     {
       "source_ref": "pnl:2025-12-01:material-shipping-cost-dhl",
@@ -440,7 +440,7 @@
       "amount": 309.0,
       "cost_type": "variable",
       "vendor": "DHL",
-      "notes": "MATERIAL SHIPPING COST/ DHL \u00b7 from the profit and loss sheet (production)"
+      "notes": "MATERIAL SHIPPING COST/ DHL · from the profit and loss sheet (production)"
     },
     {
       "source_ref": "pnl:2026-01-01:material-shipping-cost-dhl",
@@ -449,7 +449,7 @@
       "amount": 1121.0,
       "cost_type": "variable",
       "vendor": "DHL",
-      "notes": "MATERIAL SHIPPING COST/ DHL \u00b7 from the profit and loss sheet (production)"
+      "notes": "MATERIAL SHIPPING COST/ DHL · from the profit and loss sheet (production)"
     },
     {
       "source_ref": "pnl:2026-06-01:material-shipping-cost-dhl",
@@ -458,7 +458,7 @@
       "amount": 350.0,
       "cost_type": "variable",
       "vendor": "DHL",
-      "notes": "MATERIAL SHIPPING COST/ DHL \u00b7 from the profit and loss sheet (production)"
+      "notes": "MATERIAL SHIPPING COST/ DHL · from the profit and loss sheet (production)"
     },
     {
       "source_ref": "pnl:2025-04-01:tailor-cost",
@@ -467,7 +467,7 @@
       "amount": 6800.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "TAILOR COST \u00b7 from the profit and loss sheet (production)"
+      "notes": "TAILOR COST · from the profit and loss sheet (production)"
     },
     {
       "source_ref": "pnl:2025-05-01:tailor-cost",
@@ -476,7 +476,7 @@
       "amount": 8580.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "TAILOR COST \u00b7 from the profit and loss sheet (production)"
+      "notes": "TAILOR COST · from the profit and loss sheet (production)"
     },
     {
       "source_ref": "pnl:2025-06-01:tailor-cost",
@@ -485,7 +485,7 @@
       "amount": 2070.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "TAILOR COST \u00b7 from the profit and loss sheet (production)"
+      "notes": "TAILOR COST · from the profit and loss sheet (production)"
     },
     {
       "source_ref": "pnl:2025-09-01:tailor-cost",
@@ -494,7 +494,7 @@
       "amount": 885.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "TAILOR COST \u00b7 from the profit and loss sheet (production)"
+      "notes": "TAILOR COST · from the profit and loss sheet (production)"
     },
     {
       "source_ref": "pnl:2025-10-01:tailor-cost",
@@ -503,7 +503,7 @@
       "amount": 4385.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "TAILOR COST \u00b7 from the profit and loss sheet (production)"
+      "notes": "TAILOR COST · from the profit and loss sheet (production)"
     },
     {
       "source_ref": "pnl:2025-11-01:tailor-cost",
@@ -512,7 +512,7 @@
       "amount": 2720.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "TAILOR COST \u00b7 from the profit and loss sheet (production)"
+      "notes": "TAILOR COST · from the profit and loss sheet (production)"
     },
     {
       "source_ref": "pnl:2026-01-01:tailor-cost",
@@ -521,7 +521,7 @@
       "amount": 2055.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "TAILOR COST \u00b7 from the profit and loss sheet (production)"
+      "notes": "TAILOR COST · from the profit and loss sheet (production)"
     },
     {
       "source_ref": "pnl:2026-02-01:tailor-cost",
@@ -530,7 +530,7 @@
       "amount": 2805.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "TAILOR COST \u00b7 from the profit and loss sheet (production)"
+      "notes": "TAILOR COST · from the profit and loss sheet (production)"
     },
     {
       "source_ref": "pnl:2026-03-01:tailor-cost",
@@ -539,7 +539,7 @@
       "amount": 165.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "TAILOR COST \u00b7 from the profit and loss sheet (production)"
+      "notes": "TAILOR COST · from the profit and loss sheet (production)"
     },
     {
       "source_ref": "pnl:2026-04-01:tailor-cost",
@@ -548,7 +548,7 @@
       "amount": 4325.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "TAILOR COST \u00b7 from the profit and loss sheet (production)"
+      "notes": "TAILOR COST · from the profit and loss sheet (production)"
     },
     {
       "source_ref": "pnl:2026-05-01:tailor-cost",
@@ -557,7 +557,7 @@
       "amount": 1220.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "TAILOR COST \u00b7 from the profit and loss sheet (production)"
+      "notes": "TAILOR COST · from the profit and loss sheet (production)"
     },
     {
       "source_ref": "pnl:2026-06-01:tailor-cost",
@@ -566,7 +566,7 @@
       "amount": 505.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "TAILOR COST \u00b7 from the profit and loss sheet (production)"
+      "notes": "TAILOR COST · from the profit and loss sheet (production)"
     },
     {
       "source_ref": "pnl:2026-08-01:tailor-cost",
@@ -575,7 +575,7 @@
       "amount": 1505.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "TAILOR COST \u00b7 from the profit and loss sheet (production)"
+      "notes": "TAILOR COST · from the profit and loss sheet (production)"
     },
     {
       "source_ref": "pnl:2025-09-01:tailor-samples-making-cost",
@@ -584,7 +584,7 @@
       "amount": 270.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "TAILOR/ samples making COST \u00b7 from the profit and loss sheet (production)"
+      "notes": "TAILOR/ samples making COST · from the profit and loss sheet (production)"
     },
     {
       "source_ref": "pnl:2025-11-01:tailor-samples-making-cost",
@@ -593,7 +593,7 @@
       "amount": 100.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "TAILOR/ samples making COST \u00b7 from the profit and loss sheet (production)"
+      "notes": "TAILOR/ samples making COST · from the profit and loss sheet (production)"
     },
     {
       "source_ref": "pnl:2026-08-01:tailor-samples-making-cost",
@@ -602,7 +602,7 @@
       "amount": 175.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "TAILOR/ samples making COST \u00b7 from the profit and loss sheet (production)"
+      "notes": "TAILOR/ samples making COST · from the profit and loss sheet (production)"
     },
     {
       "source_ref": "pnl:2025-04-01:label-purchase",
@@ -611,7 +611,7 @@
       "amount": 1070.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "LABEL PURCHASE \u00b7 from the profit and loss sheet (production)"
+      "notes": "LABEL PURCHASE · from the profit and loss sheet (production)"
     },
     {
       "source_ref": "pnl:2025-11-01:label-purchase",
@@ -620,7 +620,7 @@
       "amount": 435.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "LABEL PURCHASE \u00b7 from the profit and loss sheet (production)"
+      "notes": "LABEL PURCHASE · from the profit and loss sheet (production)"
     },
     {
       "source_ref": "pnl:2026-05-01:label-purchase",
@@ -629,7 +629,7 @@
       "amount": 640.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "LABEL PURCHASE \u00b7 from the profit and loss sheet (production)"
+      "notes": "LABEL PURCHASE · from the profit and loss sheet (production)"
     },
     {
       "source_ref": "pnl:2025-05-01:material-charm",
@@ -638,7 +638,7 @@
       "amount": 90.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "MATERIAL CHARM \u00b7 from the profit and loss sheet (production)"
+      "notes": "MATERIAL CHARM · from the profit and loss sheet (production)"
     },
     {
       "source_ref": "pnl:2025-10-01:material-pearls",
@@ -647,7 +647,7 @@
       "amount": 165.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "MATERIAL PEARLS \u00b7 from the profit and loss sheet (production)"
+      "notes": "MATERIAL PEARLS · from the profit and loss sheet (production)"
     },
     {
       "source_ref": "pnl:2025-12-01:material-pearls",
@@ -656,7 +656,7 @@
       "amount": 160.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "MATERIAL PEARLS \u00b7 from the profit and loss sheet (production)"
+      "notes": "MATERIAL PEARLS · from the profit and loss sheet (production)"
     },
     {
       "source_ref": "pnl:2025-05-01:consumables-al-rawnaq",
@@ -665,7 +665,7 @@
       "amount": 249.0,
       "cost_type": "variable",
       "vendor": "Al Rawnaq",
-      "notes": "CONSUMABLES AL RAWNAQ \u00b7 from the profit and loss sheet (production)"
+      "notes": "CONSUMABLES AL RAWNAQ · from the profit and loss sheet (production)"
     },
     {
       "source_ref": "pnl:2025-06-01:consumables-al-rawnaq",
@@ -674,7 +674,7 @@
       "amount": 45.0,
       "cost_type": "variable",
       "vendor": "Al Rawnaq",
-      "notes": "CONSUMABLES AL RAWNAQ \u00b7 from the profit and loss sheet (production)"
+      "notes": "CONSUMABLES AL RAWNAQ · from the profit and loss sheet (production)"
     },
     {
       "source_ref": "pnl:2026-01-01:consumables-al-rawnaq",
@@ -683,7 +683,7 @@
       "amount": 98.0,
       "cost_type": "variable",
       "vendor": "Al Rawnaq",
-      "notes": "CONSUMABLES AL RAWNAQ \u00b7 from the profit and loss sheet (production)"
+      "notes": "CONSUMABLES AL RAWNAQ · from the profit and loss sheet (production)"
     },
     {
       "source_ref": "pnl:2025-04-01:technical-support-zentinel-fievr-vibes",
@@ -692,7 +692,7 @@
       "amount": 265.0,
       "cost_type": "variable",
       "vendor": "Zentinel / Fiverr",
-      "notes": "TECHNICAL SUPPORT ZENTINEL/fievr/vibes \u00b7 from the profit and loss sheet (production)"
+      "notes": "TECHNICAL SUPPORT ZENTINEL/fievr/vibes · from the profit and loss sheet (production)"
     },
     {
       "source_ref": "pnl:2025-10-01:technical-support-zentinel-fievr-vibes",
@@ -701,7 +701,7 @@
       "amount": 2208.0,
       "cost_type": "variable",
       "vendor": "Zentinel / Fiverr",
-      "notes": "TECHNICAL SUPPORT ZENTINEL/fievr/vibes \u00b7 from the profit and loss sheet (production)"
+      "notes": "TECHNICAL SUPPORT ZENTINEL/fievr/vibes · from the profit and loss sheet (production)"
     },
     {
       "source_ref": "pnl:2025-09-01:printing-ast-print",
@@ -710,7 +710,7 @@
       "amount": 32.0,
       "cost_type": "variable",
       "vendor": "AST Print",
-      "notes": "Printing AST Print \u00b7 from the profit and loss sheet (production)"
+      "notes": "Printing AST Print · from the profit and loss sheet (production)"
     },
     {
       "source_ref": "pnl:2025-11-01:printing-ast-print",
@@ -719,7 +719,7 @@
       "amount": 850.0,
       "cost_type": "variable",
       "vendor": "AST Print",
-      "notes": "Printing AST Print \u00b7 from the profit and loss sheet (production)"
+      "notes": "Printing AST Print · from the profit and loss sheet (production)"
     },
     {
       "source_ref": "pnl:2026-01-01:printing-ast-print",
@@ -728,7 +728,7 @@
       "amount": 40.0,
       "cost_type": "variable",
       "vendor": "AST Print",
-      "notes": "Printing AST Print \u00b7 from the profit and loss sheet (production)"
+      "notes": "Printing AST Print · from the profit and loss sheet (production)"
     },
     {
       "source_ref": "pnl:2026-05-01:printing-ast-print",
@@ -737,7 +737,7 @@
       "amount": 40.0,
       "cost_type": "variable",
       "vendor": "AST Print",
-      "notes": "Printing AST Print \u00b7 from the profit and loss sheet (production)"
+      "notes": "Printing AST Print · from the profit and loss sheet (production)"
     },
     {
       "source_ref": "pnl:2026-05-01:retailer-comission-sales",
@@ -746,7 +746,7 @@
       "amount": 180.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "RETAILER COMISSION SALES \u00b7 from the profit and loss sheet (commercial)"
+      "notes": "RETAILER COMISSION SALES · from the profit and loss sheet (commercial)"
     },
     {
       "source_ref": "pnl:2025-04-01:shipping-cost",
@@ -755,7 +755,7 @@
       "amount": 182.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "SHIPPING COST \u00b7 from the profit and loss sheet (commercial)"
+      "notes": "SHIPPING COST · from the profit and loss sheet (commercial)"
     },
     {
       "source_ref": "pnl:2025-05-01:shipping-cost",
@@ -764,7 +764,7 @@
       "amount": 1345.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "SHIPPING COST \u00b7 from the profit and loss sheet (commercial)"
+      "notes": "SHIPPING COST · from the profit and loss sheet (commercial)"
     },
     {
       "source_ref": "pnl:2026-08-01:shipping-cost",
@@ -773,7 +773,7 @@
       "amount": 150.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "SHIPPING COST \u00b7 from the profit and loss sheet (commercial)"
+      "notes": "SHIPPING COST · from the profit and loss sheet (commercial)"
     },
     {
       "source_ref": "pnl:2025-10-01:gift-dresses-cost",
@@ -782,7 +782,7 @@
       "amount": 720.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "GIFT DRESSES COST \u00b7 from the profit and loss sheet (commercial)"
+      "notes": "GIFT DRESSES COST · from the profit and loss sheet (commercial)"
     },
     {
       "source_ref": "pnl:2025-10-01:traveling-plane-cost",
@@ -791,7 +791,7 @@
       "amount": 2183.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "TRAVELING plane COST \u00b7 from the profit and loss sheet (commercial)"
+      "notes": "TRAVELING plane COST · from the profit and loss sheet (commercial)"
     },
     {
       "source_ref": "pnl:2026-01-01:traveling-plane-cost",
@@ -800,7 +800,7 @@
       "amount": 1540.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "TRAVELING plane COST \u00b7 from the profit and loss sheet (commercial)"
+      "notes": "TRAVELING plane COST · from the profit and loss sheet (commercial)"
     },
     {
       "source_ref": "pnl:2026-01-01:traveling-ubercost",
@@ -809,7 +809,7 @@
       "amount": 880.0,
       "cost_type": "variable",
       "vendor": "Uber",
-      "notes": "TRAVELING uberCOST \u00b7 from the profit and loss sheet (commercial)"
+      "notes": "TRAVELING uberCOST · from the profit and loss sheet (commercial)"
     },
     {
       "source_ref": "pnl:2025-04-01:social-media-intern",
@@ -818,7 +818,7 @@
       "amount": 2062.25,
       "cost_type": "fixed",
       "vendor": null,
-      "notes": "SOCIAL MEDIA INTERN \u00b7 from the profit and loss sheet (marketing)"
+      "notes": "SOCIAL MEDIA INTERN · from the profit and loss sheet (marketing)"
     },
     {
       "source_ref": "pnl:2025-05-01:social-media-intern",
@@ -827,7 +827,7 @@
       "amount": 2062.25,
       "cost_type": "fixed",
       "vendor": null,
-      "notes": "SOCIAL MEDIA INTERN \u00b7 from the profit and loss sheet (marketing)"
+      "notes": "SOCIAL MEDIA INTERN · from the profit and loss sheet (marketing)"
     },
     {
       "source_ref": "pnl:2025-06-01:social-media-intern",
@@ -836,7 +836,7 @@
       "amount": 2062.25,
       "cost_type": "fixed",
       "vendor": null,
-      "notes": "SOCIAL MEDIA INTERN \u00b7 from the profit and loss sheet (marketing)"
+      "notes": "SOCIAL MEDIA INTERN · from the profit and loss sheet (marketing)"
     },
     {
       "source_ref": "pnl:2025-07-01:social-media-intern",
@@ -845,7 +845,7 @@
       "amount": 2062.25,
       "cost_type": "fixed",
       "vendor": null,
-      "notes": "SOCIAL MEDIA INTERN \u00b7 from the profit and loss sheet (marketing)"
+      "notes": "SOCIAL MEDIA INTERN · from the profit and loss sheet (marketing)"
     },
     {
       "source_ref": "pnl:2025-08-01:social-media-intern",
@@ -854,7 +854,7 @@
       "amount": 2062.25,
       "cost_type": "fixed",
       "vendor": null,
-      "notes": "SOCIAL MEDIA INTERN \u00b7 from the profit and loss sheet (marketing)"
+      "notes": "SOCIAL MEDIA INTERN · from the profit and loss sheet (marketing)"
     },
     {
       "source_ref": "pnl:2025-09-01:social-media-intern",
@@ -863,7 +863,7 @@
       "amount": 2062.25,
       "cost_type": "fixed",
       "vendor": null,
-      "notes": "SOCIAL MEDIA INTERN \u00b7 from the profit and loss sheet (marketing)"
+      "notes": "SOCIAL MEDIA INTERN · from the profit and loss sheet (marketing)"
     },
     {
       "source_ref": "pnl:2025-10-01:social-media-intern",
@@ -872,7 +872,7 @@
       "amount": 2062.25,
       "cost_type": "fixed",
       "vendor": null,
-      "notes": "SOCIAL MEDIA INTERN \u00b7 from the profit and loss sheet (marketing)"
+      "notes": "SOCIAL MEDIA INTERN · from the profit and loss sheet (marketing)"
     },
     {
       "source_ref": "pnl:2026-06-01:social-media-instagram-pub",
@@ -881,7 +881,7 @@
       "amount": 4300.0,
       "cost_type": "variable",
       "vendor": "Instagram",
-      "notes": "SOCIAL MEDIA instagram pub \u00b7 from the profit and loss sheet (marketing)"
+      "notes": "SOCIAL MEDIA instagram pub · from the profit and loss sheet (marketing)"
     },
     {
       "source_ref": "pnl:2026-07-01:website-maintenance",
@@ -890,7 +890,7 @@
       "amount": 5000.0,
       "cost_type": "fixed",
       "vendor": null,
-      "notes": "WEBSITE MAINTENANCE \u00b7 from the profit and loss sheet (marketing)"
+      "notes": "WEBSITE MAINTENANCE · from the profit and loss sheet (marketing)"
     },
     {
       "source_ref": "pnl:2025-04-01:website-hosting-shopify",
@@ -899,7 +899,7 @@
       "amount": 116.0,
       "cost_type": "fixed",
       "vendor": "Shopify",
-      "notes": "WEBSITE HOSTING SHOPIFY \u00b7 from the profit and loss sheet (marketing)"
+      "notes": "WEBSITE HOSTING SHOPIFY · from the profit and loss sheet (marketing)"
     },
     {
       "source_ref": "pnl:2025-05-01:website-hosting-shopify",
@@ -908,7 +908,7 @@
       "amount": 116.0,
       "cost_type": "fixed",
       "vendor": "Shopify",
-      "notes": "WEBSITE HOSTING SHOPIFY \u00b7 from the profit and loss sheet (marketing)"
+      "notes": "WEBSITE HOSTING SHOPIFY · from the profit and loss sheet (marketing)"
     },
     {
       "source_ref": "pnl:2025-06-01:website-hosting-shopify",
@@ -917,7 +917,7 @@
       "amount": 116.0,
       "cost_type": "fixed",
       "vendor": "Shopify",
-      "notes": "WEBSITE HOSTING SHOPIFY \u00b7 from the profit and loss sheet (marketing)"
+      "notes": "WEBSITE HOSTING SHOPIFY · from the profit and loss sheet (marketing)"
     },
     {
       "source_ref": "pnl:2025-07-01:website-hosting-shopify",
@@ -926,7 +926,7 @@
       "amount": 116.0,
       "cost_type": "fixed",
       "vendor": "Shopify",
-      "notes": "WEBSITE HOSTING SHOPIFY \u00b7 from the profit and loss sheet (marketing)"
+      "notes": "WEBSITE HOSTING SHOPIFY · from the profit and loss sheet (marketing)"
     },
     {
       "source_ref": "pnl:2025-08-01:website-hosting-shopify",
@@ -935,7 +935,7 @@
       "amount": 116.0,
       "cost_type": "fixed",
       "vendor": "Shopify",
-      "notes": "WEBSITE HOSTING SHOPIFY \u00b7 from the profit and loss sheet (marketing)"
+      "notes": "WEBSITE HOSTING SHOPIFY · from the profit and loss sheet (marketing)"
     },
     {
       "source_ref": "pnl:2025-09-01:website-hosting-shopify",
@@ -944,7 +944,7 @@
       "amount": 116.0,
       "cost_type": "fixed",
       "vendor": "Shopify",
-      "notes": "WEBSITE HOSTING SHOPIFY \u00b7 from the profit and loss sheet (marketing)"
+      "notes": "WEBSITE HOSTING SHOPIFY · from the profit and loss sheet (marketing)"
     },
     {
       "source_ref": "pnl:2025-10-01:website-hosting-shopify",
@@ -953,7 +953,7 @@
       "amount": 116.0,
       "cost_type": "fixed",
       "vendor": "Shopify",
-      "notes": "WEBSITE HOSTING SHOPIFY \u00b7 from the profit and loss sheet (marketing)"
+      "notes": "WEBSITE HOSTING SHOPIFY · from the profit and loss sheet (marketing)"
     },
     {
       "source_ref": "pnl:2025-11-01:website-hosting-shopify",
@@ -962,7 +962,7 @@
       "amount": 116.0,
       "cost_type": "fixed",
       "vendor": "Shopify",
-      "notes": "WEBSITE HOSTING SHOPIFY \u00b7 from the profit and loss sheet (marketing)"
+      "notes": "WEBSITE HOSTING SHOPIFY · from the profit and loss sheet (marketing)"
     },
     {
       "source_ref": "pnl:2025-12-01:website-hosting-shopify",
@@ -971,7 +971,7 @@
       "amount": 116.0,
       "cost_type": "fixed",
       "vendor": "Shopify",
-      "notes": "WEBSITE HOSTING SHOPIFY \u00b7 from the profit and loss sheet (marketing)"
+      "notes": "WEBSITE HOSTING SHOPIFY · from the profit and loss sheet (marketing)"
     },
     {
       "source_ref": "pnl:2026-01-01:website-hosting-shopify",
@@ -980,7 +980,7 @@
       "amount": 116.0,
       "cost_type": "fixed",
       "vendor": "Shopify",
-      "notes": "WEBSITE HOSTING SHOPIFY \u00b7 from the profit and loss sheet (marketing)"
+      "notes": "WEBSITE HOSTING SHOPIFY · from the profit and loss sheet (marketing)"
     },
     {
       "source_ref": "pnl:2026-02-01:website-hosting-shopify",
@@ -989,7 +989,7 @@
       "amount": 116.0,
       "cost_type": "fixed",
       "vendor": "Shopify",
-      "notes": "WEBSITE HOSTING SHOPIFY \u00b7 from the profit and loss sheet (marketing)"
+      "notes": "WEBSITE HOSTING SHOPIFY · from the profit and loss sheet (marketing)"
     },
     {
       "source_ref": "pnl:2026-03-01:website-hosting-shopify",
@@ -998,7 +998,7 @@
       "amount": 116.0,
       "cost_type": "fixed",
       "vendor": "Shopify",
-      "notes": "WEBSITE HOSTING SHOPIFY \u00b7 from the profit and loss sheet (marketing)"
+      "notes": "WEBSITE HOSTING SHOPIFY · from the profit and loss sheet (marketing)"
     },
     {
       "source_ref": "pnl:2026-04-01:website-hosting-shopify",
@@ -1007,7 +1007,7 @@
       "amount": 116.0,
       "cost_type": "fixed",
       "vendor": "Shopify",
-      "notes": "WEBSITE HOSTING SHOPIFY \u00b7 from the profit and loss sheet (marketing)"
+      "notes": "WEBSITE HOSTING SHOPIFY · from the profit and loss sheet (marketing)"
     },
     {
       "source_ref": "pnl:2026-05-01:website-hosting-shopify",
@@ -1016,7 +1016,7 @@
       "amount": 116.0,
       "cost_type": "fixed",
       "vendor": "Shopify",
-      "notes": "WEBSITE HOSTING SHOPIFY \u00b7 from the profit and loss sheet (marketing)"
+      "notes": "WEBSITE HOSTING SHOPIFY · from the profit and loss sheet (marketing)"
     },
     {
       "source_ref": "pnl:2026-06-01:website-hosting-shopify",
@@ -1025,7 +1025,7 @@
       "amount": 116.0,
       "cost_type": "fixed",
       "vendor": "Shopify",
-      "notes": "WEBSITE HOSTING SHOPIFY \u00b7 from the profit and loss sheet (marketing)"
+      "notes": "WEBSITE HOSTING SHOPIFY · from the profit and loss sheet (marketing)"
     },
     {
       "source_ref": "pnl:2025-04-01:events-shows-exhibition",
@@ -1034,7 +1034,7 @@
       "amount": 12757.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "EVENTS / SHOWS EXHIBITION \u00b7 from the profit and loss sheet (marketing)"
+      "notes": "EVENTS / SHOWS EXHIBITION · from the profit and loss sheet (marketing)"
     },
     {
       "source_ref": "pnl:2026-01-01:events-shows-exhibition",
@@ -1043,7 +1043,7 @@
       "amount": 8000.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "EVENTS / SHOWS EXHIBITION \u00b7 from the profit and loss sheet (marketing)"
+      "notes": "EVENTS / SHOWS EXHIBITION · from the profit and loss sheet (marketing)"
     },
     {
       "source_ref": "pnl:2026-04-01:events-shows-exhibition",
@@ -1052,7 +1052,7 @@
       "amount": 750.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "EVENTS / SHOWS EXHIBITION \u00b7 from the profit and loss sheet (marketing)"
+      "notes": "EVENTS / SHOWS EXHIBITION · from the profit and loss sheet (marketing)"
     },
     {
       "source_ref": "pnl:2026-05-01:events-shows-exhibition",
@@ -1061,7 +1061,7 @@
       "amount": 3000.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "EVENTS / SHOWS EXHIBITION \u00b7 from the profit and loss sheet (marketing)"
+      "notes": "EVENTS / SHOWS EXHIBITION · from the profit and loss sheet (marketing)"
     },
     {
       "source_ref": "pnl:2026-06-01:events-shows-exhibition",
@@ -1070,7 +1070,7 @@
       "amount": 916.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "EVENTS / SHOWS EXHIBITION \u00b7 from the profit and loss sheet (marketing)"
+      "notes": "EVENTS / SHOWS EXHIBITION · from the profit and loss sheet (marketing)"
     },
     {
       "source_ref": "pnl:2026-07-01:events-shows-exhibition",
@@ -1079,7 +1079,7 @@
       "amount": 11265.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "EVENTS / SHOWS EXHIBITION \u00b7 from the profit and loss sheet (marketing)"
+      "notes": "EVENTS / SHOWS EXHIBITION · from the profit and loss sheet (marketing)"
     },
     {
       "source_ref": "pnl:2026-08-01:events-shows-exhibition",
@@ -1088,7 +1088,7 @@
       "amount": 1500.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "EVENTS / SHOWS EXHIBITION \u00b7 from the profit and loss sheet (marketing)"
+      "notes": "EVENTS / SHOWS EXHIBITION · from the profit and loss sheet (marketing)"
     },
     {
       "source_ref": "pnl:2025-05-01:communication-photo-shoot",
@@ -1097,7 +1097,7 @@
       "amount": 20530.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "COMMUNICATION PHOTO SHOOT \u00b7 from the profit and loss sheet (marketing)"
+      "notes": "COMMUNICATION PHOTO SHOOT · from the profit and loss sheet (marketing)"
     },
     {
       "source_ref": "pnl:2026-05-01:communication-photo-shoot",
@@ -1106,7 +1106,7 @@
       "amount": 5000.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "COMMUNICATION PHOTO SHOOT \u00b7 from the profit and loss sheet (marketing)"
+      "notes": "COMMUNICATION PHOTO SHOOT · from the profit and loss sheet (marketing)"
     },
     {
       "source_ref": "pnl:2026-08-01:communication-photo-shoot",
@@ -1115,7 +1115,7 @@
       "amount": 2000.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "COMMUNICATION PHOTO SHOOT \u00b7 from the profit and loss sheet (marketing)"
+      "notes": "COMMUNICATION PHOTO SHOOT · from the profit and loss sheet (marketing)"
     },
     {
       "source_ref": "pnl:2025-06-01:communication-look-book",
@@ -1124,7 +1124,7 @@
       "amount": 609.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "COMMUNICATION LOOK BOOK \u00b7 from the profit and loss sheet (marketing)"
+      "notes": "COMMUNICATION LOOK BOOK · from the profit and loss sheet (marketing)"
     },
     {
       "source_ref": "pnl:2025-05-01:marketing-promotional-bags",
@@ -1133,7 +1133,7 @@
       "amount": 1980.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "MARKETING PROMOTIONAL BAGS \u00b7 from the profit and loss sheet (marketing)"
+      "notes": "MARKETING PROMOTIONAL BAGS · from the profit and loss sheet (marketing)"
     },
     {
       "source_ref": "pnl:2025-10-01:marketing-promotional-bags",
@@ -1142,7 +1142,7 @@
       "amount": 91.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "MARKETING PROMOTIONAL BAGS \u00b7 from the profit and loss sheet (marketing)"
+      "notes": "MARKETING PROMOTIONAL BAGS · from the profit and loss sheet (marketing)"
     },
     {
       "source_ref": "pnl:2025-11-01:marketing-promotional-bags",
@@ -1151,7 +1151,7 @@
       "amount": 250.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "MARKETING PROMOTIONAL BAGS \u00b7 from the profit and loss sheet (marketing)"
+      "notes": "MARKETING PROMOTIONAL BAGS · from the profit and loss sheet (marketing)"
     },
     {
       "source_ref": "pnl:2026-03-01:government-fees",
@@ -1160,7 +1160,7 @@
       "amount": 2300.0,
       "cost_type": "fixed",
       "vendor": null,
-      "notes": "GOVERNMENT FEES \u00b7 from the profit and loss sheet (admin)"
+      "notes": "GOVERNMENT FEES · from the profit and loss sheet (admin)"
     },
     {
       "source_ref": "pnl:2025-04-01:charity-foundation",
@@ -1169,7 +1169,7 @@
       "amount": 900.0,
       "cost_type": "variable",
       "vendor": null,
-      "notes": "CHARITY FOUNDATION \u00b7 from the profit and loss sheet (admin)"
+      "notes": "CHARITY FOUNDATION · from the profit and loss sheet (admin)"
     },
     {
       "source_ref": "pnl:2025-08-01:mega-image-stock",
@@ -1178,7 +1178,7 @@
       "amount": 509.0,
       "cost_type": "fixed",
       "vendor": "Mega",
-      "notes": "MEGA IMAGE STOCK \u00b7 from the profit and loss sheet (admin)"
+      "notes": "MEGA IMAGE STOCK · from the profit and loss sheet (admin)"
     },
     {
       "source_ref": "pnl:2026-08-01:mega-image-stock",
@@ -1187,7 +1187,7 @@
       "amount": 400.0,
       "cost_type": "fixed",
       "vendor": "Mega",
-      "notes": "MEGA IMAGE STOCK \u00b7 from the profit and loss sheet (admin)"
+      "notes": "MEGA IMAGE STOCK · from the profit and loss sheet (admin)"
     },
     {
       "source_ref": "pnl:2026-01-01:salary",
@@ -1196,7 +1196,7 @@
       "amount": 1289.0,
       "cost_type": "fixed",
       "vendor": null,
-      "notes": "SALARY \u00b7 from the profit and loss sheet (admin)"
+      "notes": "SALARY · from the profit and loss sheet (admin)"
     },
     {
       "source_ref": "pnl:2026-05-01:accounting-for-taxes",
@@ -1205,14 +1205,17 @@
       "amount": 2000.0,
       "cost_type": "fixed",
       "vendor": null,
-      "notes": "accounting for taxes \u00b7 from the profit and loss sheet (admin)"
+      "notes": "accounting for taxes · from the profit and loss sheet (admin)"
+    },
+    {
+      "source_ref": "pnl:2025-10-01:advance-payment-from-customer",
+      "expense_date": "2025-10-01",
+      "category": "other",
+      "amount": -2456.74,
+      "cost_type": "variable",
+      "vendor": null,
+      "notes": "ADVANCE PAYMENT FROM CUSTOMER · from the profit and loss sheet (production) · a credit: the sheet nets this against October's costs, so it is stored as a negative amount"
     }
   ],
-  "expenses_skipped": [
-    {
-      "month": "2025-10-01",
-      "label": "Advance Payment from customer",
-      "amount": -2456.74
-    }
-  ]
+  "expenses_skipped": []
 }

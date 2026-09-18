@@ -288,6 +288,22 @@ export interface PnLRow {
   netMarginPct: number;
 }
 
+/**
+ * The months the profit-and-loss spreadsheet covers, keyed "yyyy-MM".
+ *
+ * For any month in here the spreadsheet is the record of the business, and
+ * the piece-level `sales` and imported `expenses` rows are left out of the
+ * period totals so nothing is counted twice. See `buildProfitAndLoss`.
+ */
+function spreadsheetMonthKeys(months: FinancialMonth[]): Set<string> {
+  return new Set(months.map((m) => m.month.slice(0, 7)));
+}
+
+/** An expense row created by `npm run import-financials` rather than by hand. */
+function isSpreadsheetExpense(expense: Expense): boolean {
+  return typeof expense.source_ref === "string" && expense.source_ref.startsWith("pnl:");
+}
+
 function periodKey(dateStr: string, grouping: PnLGrouping): { key: string; label: string; start: string } {
   const d = parseISO(dateStr);
   if (grouping === "year") {
@@ -326,7 +342,8 @@ function periodKey(dateStr: string, grouping: PnLGrouping): { key: string; label
 export function buildProfitAndLoss(
   sales: SaleWithDetails[],
   expenses: Expense[],
-  grouping: PnLGrouping
+  grouping: PnLGrouping,
+  financialMonths: FinancialMonth[] = []
 ): PnLRow[] {
   interface Acc {
     label: string;
@@ -336,9 +353,15 @@ export function buildProfitAndLoss(
     operatingExpenses: number;
   }
   const map = new Map<string, Acc>();
+  const covered = spreadsheetMonthKeys(financialMonths);
+  const isCovered = (isoDate: string) => covered.has(isoDate.slice(0, 7));
 
   for (const s of sales) {
     if (!s.sale_date) continue; // unknown-date historical sales aren't attributable to a period
+    // The spreadsheet already states this month's revenue in full, and it
+    // counts sales this table has never seen. Adding the piece-level rows on
+    // top would count the same dresses twice.
+    if (isCovered(s.sale_date)) continue;
     const { key, label, start } = periodKey(s.sale_date, grouping);
     const row = map.get(key) ?? { label, start, revenue: 0, cogs: 0, operatingExpenses: 0 };
     row.revenue += s.revenue;
@@ -347,9 +370,26 @@ export function buildProfitAndLoss(
   }
 
   for (const e of expenses) {
+    // Same again on the cost side: in a covered month the four cost bands
+    // below are the sheet's own totals, and these rows are what those totals
+    // were split into. Anything entered by hand still counts.
+    if (isCovered(e.expense_date) && isSpreadsheetExpense(e)) continue;
     const { key, label, start } = periodKey(e.expense_date, grouping);
     const row = map.get(key) ?? { label, start, revenue: 0, cogs: 0, operatingExpenses: 0 };
     row.operatingExpenses += e.amount;
+    map.set(key, row);
+  }
+
+  // The spreadsheet's own monthly figures. Production is the closest thing the
+  // sheet has to cost of goods sold, so it sits in COGS and the other three
+  // bands are operating expenses — which makes net profit here the same number
+  // as the cash net on the dashboard.
+  for (const m of financialMonths) {
+    const { key, label, start } = periodKey(m.month, grouping);
+    const row = map.get(key) ?? { label, start, revenue: 0, cogs: 0, operatingExpenses: 0 };
+    row.revenue += m.revenue;
+    row.cogs += m.cost_production;
+    row.operatingExpenses += m.cost_commercial + m.cost_marketing + m.cost_admin;
     map.set(key, row);
   }
 
@@ -405,7 +445,8 @@ export function buildCashFlow(
   sales: SaleWithDetails[],
   expenses: Expense[],
   grouping: PnLGrouping,
-  startingBalance = 0
+  startingBalance = 0,
+  financialMonths: FinancialMonth[] = []
 ): CashFlowRow[] {
   interface Acc {
     label: string;
@@ -414,18 +455,32 @@ export function buildCashFlow(
     cashOut: number;
   }
   const map = new Map<string, Acc>();
+  const covered = spreadsheetMonthKeys(financialMonths);
+  const isCovered = (isoDate: string) => covered.has(isoDate.slice(0, 7));
 
   for (const s of sales) {
     if (!s.sale_date) continue; // unknown-date historical sales aren't attributable to a period
+    if (isCovered(s.sale_date)) continue; // the sheet already states this month in full
     const { key, label, start } = periodKey(s.sale_date, grouping);
     const row = map.get(key) ?? { label, start, cashIn: 0, cashOut: 0 };
     row.cashIn += s.revenue;
     map.set(key, row);
   }
   for (const e of expenses) {
+    if (isCovered(e.expense_date) && isSpreadsheetExpense(e)) continue;
     const { key, label, start } = periodKey(e.expense_date, grouping);
     const row = map.get(key) ?? { label, start, cashIn: 0, cashOut: 0 };
     row.cashOut += e.amount;
+    map.set(key, row);
+  }
+
+  // The sheet's cost bands are cash paid in the month, which is exactly what
+  // this table wants.
+  for (const m of financialMonths) {
+    const { key, label, start } = periodKey(m.month, grouping);
+    const row = map.get(key) ?? { label, start, cashIn: 0, cashOut: 0 };
+    row.cashIn += m.revenue;
+    row.cashOut += m.cost_production + m.cost_commercial + m.cost_marketing + m.cost_admin;
     map.set(key, row);
   }
 

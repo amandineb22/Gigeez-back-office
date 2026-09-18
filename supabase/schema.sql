@@ -177,7 +177,12 @@ create table if not exists expenses (
       'rent', 'utilities', 'salaries', 'software', 'travel', 'other'
     )
   ),
-  amount numeric(10, 2) not null check (amount >= 0),
+  -- No "amount >= 0" check: the profit and loss sheet nets credits against a
+  -- month's costs (a customer advance, a supplier refund), and those lines have
+  -- to import as negative amounts for a month's expenses to add up to the same
+  -- total the sheet shows. The add-expense form still refuses a negative, so
+  -- only the importer can create one.
+  amount numeric(10, 2) not null,
   cost_type text not null check (cost_type in ('fixed', 'variable')),
   vendor text,
   notes text,
