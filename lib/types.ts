@@ -17,6 +17,7 @@ export type ExpenseCategory =
   | "utilities"
   | "salaries"
   | "software"
+  | "travel"
   | "other";
 
 export type CostType = "fixed" | "variable";
@@ -240,6 +241,7 @@ export const EXPENSE_CATEGORIES: ExpenseCategory[] = [
   "utilities",
   "salaries",
   "software",
+  "travel",
   "other",
 ];
 
@@ -285,3 +287,21 @@ export const FINANCIAL_COST_BANDS = [
 ] as const;
 
 export type FinancialCostBand = (typeof FINANCIAL_COST_BANDS)[number]["key"];
+
+/**
+ * A fiscal year from the HIST tab — years ending 31 March, predating the
+ * monthly P&L sheet. No unit counts: the tab never recorded them.
+ */
+export interface HistoricYear {
+  id: string;
+  fiscal_year: number;
+  revenue: number;
+  cogs: number;
+  gross_profit: number;
+  ebitda: number;
+  inventories: number;
+  net_cash: number;
+  net_equity: number;
+  created_at: string;
+  updated_at: string;
+}

@@ -1,6 +1,6 @@
 import { getAllGoals } from "@/lib/data/goals";
 import { getSalesInRange } from "@/lib/data/sales";
-import { getBpTargets, getFinancialMonths } from "@/lib/data/financials";
+import { getBpTargets, getFinancialMonths, getHistoricYears } from "@/lib/data/financials";
 import { deleteGoal } from "@/lib/actions/goals";
 import {
   getGoalPeriodRange,
@@ -9,7 +9,8 @@ import {
   sumProfit,
   countOrders,
   averageOrderValue,
-  totalFinancialYear,
+  buildYearComparisons,
+  fiscalYearOf,
 } from "@/lib/calculations";
 import { toTitleCase, formatDate } from "@/lib/utils";
 import { parseCurrencyParam } from "@/lib/currency";
@@ -18,7 +19,7 @@ import { LinkButton } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ConfirmSubmitButton } from "@/components/ui/ConfirmSubmitButton";
 import { GoalProgressBar } from "@/components/dashboard/GoalProgressBar";
-import { BpTargets, type BpTargetRow } from "@/components/dashboard/BpTargets";
+import { BpTargets } from "@/components/dashboard/BpTargets";
 
 export default async function GoalsPage({
   searchParams,
@@ -26,17 +27,17 @@ export default async function GoalsPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const currency = parseCurrencyParam(await searchParams);
-  const [goals, bpTargets, financialMonths] = await Promise.all([
+  const [goals, bpTargets, financialMonths, historicYears] = await Promise.all([
     getAllGoals(),
     getBpTargets(),
     getFinancialMonths(),
+    getHistoricYears(),
   ]);
 
-  const financialYears = new Set(financialMonths.map((m) => Number(m.month.slice(0, 4))));
-  const targetRows: BpTargetRow[] = bpTargets.map((target) => ({
-    target,
-    actuals: financialYears.has(target.year) ? totalFinancialYear(target.year, financialMonths) : null,
-  }));
+  // The plan runs on fiscal years ending 31 March, so the year being lived
+  // right now is the one today falls into, not the calendar year.
+  const currentFiscalYear = fiscalYearOf(new Date().toISOString().slice(0, 10));
+  const yearComparisons = buildYearComparisons(financialMonths, historicYears, bpTargets);
 
   const rows = await Promise.all(
     goals.map(async (goal) => {
@@ -63,7 +64,7 @@ export default async function GoalsPage({
         </LinkButton>
       </div>
 
-      {rows.length === 0 && targetRows.length === 0 ? (
+      {rows.length === 0 && yearComparisons.length === 0 ? (
         <EmptyState
           title="No goals yet"
           description="Set a revenue, profit, orders, or AOV target to track progress here and on the dashboard."
@@ -102,7 +103,7 @@ export default async function GoalsPage({
         </div>
       )}
 
-      <BpTargets rows={targetRows} currency={currency} />
+      <BpTargets years={yearComparisons} currentFiscalYear={currentFiscalYear} currency={currency} />
     </div>
   );
 }

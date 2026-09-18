@@ -1,6 +1,6 @@
 {
   "source_file": "Gigeez_Profit & Loss_January 2026.xlsx",
-  "generated_note": "Extracted from the P&L and BP (Target) sheets. All money is stored in QAR, the app's base currency. Monthly rows come from the P&L sheet: 'revenue' is the sum of the per-style REV_UNIT PRICE rows (which hold monthly revenue totals per style, not unit prices) and the cost groups are the sheet's own PROD / COMMERCIAL / MARKETING / ADMIN bands. Costs are cash paid in the month, not the cost of goods sold that month. BP targets are stated in EUR in the sheet and converted at 4.124499999999999 QAR/EUR (cell A1); the original euro figures are kept alongside for reference.",
+  "generated_note": "Extracted from the P&L and BP (Target) sheets. All money is stored in QAR, the app's base currency. Monthly rows come from the P&L sheet: 'revenue' is the sum of the per-style REV_UNIT PRICE rows (which hold monthly revenue totals per style, not unit prices) and the cost groups are the sheet's own PROD / COMMERCIAL / MARKETING / ADMIN bands. Costs are cash paid in the month, not the cost of goods sold that month. BP targets are stated in EUR in the sheet and converted at 4.124499999999999 QAR/EUR (cell A1); the original euro figures are kept alongside for reference. The historic_years rows come from the HIST tab, which states figures for fiscal years ending 31 March and carries no unit counts. BP target years are fiscal years on the same basis: the plan's first year matches that year's actual revenue almost exactly, which is what pins them to the HIST basis.",
   "base_currency": "QAR",
   "qar_per_eur": 4.124499999999999,
   "monthly": [
@@ -227,6 +227,38 @@
       "revenue_eur": 839150.0,
       "expenses_eur": 378750.0,
       "ebitda_eur": 460400.0
+    }
+  ],
+  "historic_years": [
+    {
+      "fiscal_year": 2023,
+      "revenue": 55028.0,
+      "cogs": 16744.0,
+      "gross_profit": 38284.0,
+      "ebitda": 51694.0,
+      "inventories": 24211.0,
+      "net_cash": 60325.0,
+      "net_equity": 88319.0
+    },
+    {
+      "fiscal_year": 2024,
+      "revenue": 53322.0,
+      "cogs": 27809.0,
+      "gross_profit": 25513.0,
+      "ebitda": 8434.0,
+      "inventories": 24301.76,
+      "net_cash": 72451.19,
+      "net_equity": 95697.95
+    },
+    {
+      "fiscal_year": 2025,
+      "revenue": 80770.26,
+      "cogs": 25324.08,
+      "gross_profit": 55446.18,
+      "ebitda": 18548.18,
+      "inventories": 41758.0,
+      "net_cash": 64179.0,
+      "net_equity": 113347.0
     }
   ]
 }

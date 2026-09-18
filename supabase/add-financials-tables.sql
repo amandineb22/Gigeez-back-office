@@ -1,6 +1,6 @@
 -- ============================================================================
--- Adds the two tables behind the "2026 financials" dashboard section and the
--- business plan targets on the Goals page.
+-- Adds the tables behind the financials section on the dashboard and the
+-- business plan on the Goals page, plus the "travel" expense category.
 --
 -- Paste this whole file into the Supabase SQL Editor and hit Run. It is the
 -- new part of schema.sql on its own, so you don't have to re-run the whole
@@ -59,13 +59,54 @@ create table if not exists bp_targets (
 create index if not exists bp_targets_year_idx on bp_targets (year);
 
 -- ----------------------------------------------------------------------------
+-- historic_years — the HIST tab: fiscal years ending 31 March
+--
+-- Predates the monthly P&L sheet, which only starts in April 2025, so these
+-- are the only figures available for the earlier years. No unit counts: the
+-- HIST tab never recorded them. Amounts in QAR.
+-- ----------------------------------------------------------------------------
+create table if not exists historic_years (
+  id uuid primary key default gen_random_uuid(),
+  fiscal_year integer not null unique check (fiscal_year between 2000 and 2100),
+  revenue numeric(12, 2) not null default 0,
+  cogs numeric(12, 2) not null default 0,
+  gross_profit numeric(12, 2) not null default 0,
+  ebitda numeric(12, 2) not null default 0,
+  inventories numeric(12, 2) not null default 0,
+  net_cash numeric(12, 2) not null default 0,
+  net_equity numeric(12, 2) not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists historic_years_fiscal_year_idx on historic_years (fiscal_year);
+
+-- ----------------------------------------------------------------------------
+-- Allow "travel" as an expense category. The expenses table already exists, so
+-- its check constraint has to be replaced rather than redeclared.
+-- ----------------------------------------------------------------------------
+do $$
+begin
+  if exists (select 1 from pg_constraint where conname = 'expenses_category_check') then
+    alter table expenses drop constraint expenses_category_check;
+  end if;
+  alter table expenses add constraint expenses_category_check
+    check (
+      category in (
+        'materials', 'manufacturing', 'shipping', 'packaging', 'marketing',
+        'rent', 'utilities', 'salaries', 'software', 'travel', 'other'
+      )
+    );
+end $$;
+
+-- ----------------------------------------------------------------------------
 -- Keep updated_at current, the same way every other table does.
 -- ----------------------------------------------------------------------------
 do $$
 declare
   t text;
 begin
-  for t in select unnest(array['financial_months', 'bp_targets'])
+  for t in select unnest(array['financial_months', 'bp_targets', 'historic_years'])
   loop
     execute format(
       'drop trigger if exists set_updated_at on %I; create trigger set_updated_at before update on %I for each row execute function set_updated_at();',
@@ -79,12 +120,13 @@ end $$;
 -- ----------------------------------------------------------------------------
 alter table financial_months enable row level security;
 alter table bp_targets enable row level security;
+alter table historic_years enable row level security;
 
 do $$
 declare
   t text;
 begin
-  for t in select unnest(array['financial_months', 'bp_targets'])
+  for t in select unnest(array['financial_months', 'bp_targets', 'historic_years'])
   loop
     execute format('drop policy if exists "authenticated full access" on %I;', t);
     execute format(

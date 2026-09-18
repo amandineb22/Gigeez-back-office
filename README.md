@@ -100,6 +100,9 @@ profit-and-loss workbook. It carries two things:
 - **Yearly business-plan targets** from the `BP (Target)` sheet. Those are
   stated in euros in the workbook and converted to QAR on the way in, at the
   4.1245 rate the workbook itself uses. These land in `bp_targets`.
+- **Earlier fiscal years** from the `HIST` tab (FY23–FY25), which predate the
+  monthly sheet. These land in `historic_years` and carry no unit counts,
+  because the tab never recorded any.
 
 ```bash
 npm run import-financials
@@ -209,12 +212,23 @@ data/imports/             Cleaned JSON snapshots consumed by the importers
   render — server components via `parseCurrencyParam()`, client components via
   the `useCurrency()` hook. It is presentation only: switching currency never
   converts or rewrites a stored figure, and the CSV exports stay in QAR.
+  The add-expense form also lets an amount be typed in EUR or USD — handy for
+  an invoice that arrives that way — and converts it to QAR server-side before
+  storing, so nothing but QAR ever reaches the database.
   Rates live in one place, `QAR_PER_UNIT` in `lib/currency.ts` — fixed rates
   rather than a live feed (the riyal is pegged to the dollar at 3.64, and
   4.1245 is the euro rate the Gigeez P&L workbook uses), so converted figures
   tie back to the spreadsheet exactly. Edit them there when the planning rate
   changes.
-- `financial_months` / `bp_targets` hold the spreadsheet figures and are kept
+- **Fiscal years end 31 March**, so April 2025 to March 2026 is FY2026. That's
+  the basis the `HIST` tab uses and the basis the business plan is built on —
+  the plan's first year matches that year's actual revenue almost exactly,
+  which is what ties the two together. Anything comparing actuals against plan
+  goes through `buildYearComparisons()` in `lib/calculations.ts` and is
+  labelled on screen with its months, so the basis is never left to be guessed.
+  The dashboard's monthly financials section stays on calendar years, since it
+  is labelled month by month and carries no plan comparison.
+- `financial_months` / `bp_targets` / `historic_years` hold the spreadsheet figures and are kept
   separate from `sales` / `expenses` on purpose — see section 5d. The cost
   columns are cash paid in the month, not the cost of the pieces sold in it,
   which is why the dashboard calls that line "cash net" rather than profit.

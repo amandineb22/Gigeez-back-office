@@ -1,6 +1,6 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
-import type { BpTarget, FinancialMonth } from "@/lib/types";
+import type { BpTarget, FinancialMonth, HistoricYear } from "@/lib/types";
 
 /** Every month of spreadsheet actuals, oldest first. */
 export async function getFinancialMonths(): Promise<FinancialMonth[]> {
@@ -37,5 +37,17 @@ export async function getBpTargets(): Promise<BpTarget[]> {
     .order("year", { ascending: true });
 
   if (error) throw new Error(`Failed to load business plan targets: ${error.message}`);
+  return data ?? [];
+}
+
+/** The HIST tab's fiscal years, earliest first. */
+export async function getHistoricYears(): Promise<HistoricYear[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("historic_years")
+    .select("*")
+    .order("fiscal_year", { ascending: true });
+
+  if (error) throw new Error(`Failed to load historic years: ${error.message}`);
   return data ?? [];
 }

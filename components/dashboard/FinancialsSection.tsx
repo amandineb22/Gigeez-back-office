@@ -3,15 +3,14 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Table, Thead, Th, Tr, Td } from "@/components/ui/Table";
 import { FinancialsChart } from "@/components/charts/FinancialsChart";
 import { MetricTile, type TileExplanation } from "@/components/dashboard/MetricTile";
-import { cn, formatCurrency, formatPercent } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
 import { BASE_CURRENCY, type Currency } from "@/lib/currency";
 import {
   summarizeFinancialMonths,
-  targetProgress,
   yearOverYearChange,
   type FinancialYearTotals,
 } from "@/lib/calculations";
-import type { BpTarget, FinancialMonth } from "@/lib/types";
+import type { FinancialMonth } from "@/lib/types";
 
 /** "Apr–Dec 2025", or "2025" when the whole year is covered. */
 function describeSpan(totals: FinancialYearTotals): string {
@@ -35,22 +34,18 @@ export function FinancialsSection({
   months,
   totals,
   previousTotals,
-  target,
   currency = BASE_CURRENCY,
 }: {
   year: number;
   months: FinancialMonth[];
   totals: FinancialYearTotals;
   previousTotals: FinancialYearTotals | null;
-  target: BpTarget | null;
   currency?: Currency;
 }) {
   const rows = summarizeFinancialMonths(months);
   const comparisonLabel = previousTotals ? describeSpan(previousTotals) : "last year";
   const change = (current: number, key: keyof FinancialYearTotals) =>
     previousTotals ? yearOverYearChange(current, previousTotals[key] as number) : null;
-
-  const targetPct = target ? targetProgress(totals.revenue, target.revenue) : null;
 
   const span = describeSpan(totals);
   const money = (n: number) => formatCurrency(n, currency);
@@ -102,7 +97,8 @@ export function FinancialsSection({
       <p className="-mt-4 mb-5 text-xs text-ink/40">
         From the profit and loss spreadsheet, covering {describeSpan(totals)}. Separate from the sales and stock
         figures above, which are recorded piece by piece. Costs are what was paid in each month, not the cost of the
-        pieces sold that month, so &ldquo;cash net&rdquo; swings with production runs and events.
+        pieces sold that month, so &ldquo;cash net&rdquo; swings with production runs and events. Progress against
+        the business plan is on the Goals page, which runs on fiscal years.
       </p>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -136,13 +132,6 @@ export function FinancialsSection({
           tone="signed"
         />
       </div>
-
-      {target && targetPct !== null && (
-        <p className="mt-5 text-xs text-ink/50">
-          Business plan target for {year} is {formatCurrency(target.revenue, currency)} of revenue.{" "}
-          {describeSpan(totals)} is at {formatPercent(targetPct, 0)} of it.
-        </p>
-      )}
 
       <div className="mt-6">
         {rows.length > 0 ? (

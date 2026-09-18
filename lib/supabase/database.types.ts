@@ -315,6 +315,32 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["bp_targets"]["Insert"]>;
         Relationships: Relationship[];
       };
+      historic_years: {
+        Row: {
+          id: string;
+          fiscal_year: number;
+          revenue: number;
+          cogs: number;
+          gross_profit: number;
+          ebitda: number;
+          inventories: number;
+          net_cash: number;
+          net_equity: number;
+        } & Timestamps;
+        Insert: {
+          id?: string;
+          fiscal_year: number;
+          revenue?: number;
+          cogs?: number;
+          gross_profit?: number;
+          ebitda?: number;
+          inventories?: number;
+          net_cash?: number;
+          net_equity?: number;
+        };
+        Update: Partial<Database["public"]["Tables"]["historic_years"]["Insert"]>;
+        Relationships: Relationship[];
+      };
     };
     Views: {
       v_sales: {

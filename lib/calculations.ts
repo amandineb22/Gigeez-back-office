@@ -24,9 +24,11 @@ import {
   startOfWeek,
 } from "date-fns";
 import type {
+  BpTarget,
   Expense,
   FinancialMonth,
   Goal,
+  HistoricYear,
   InventoryRow,
   SaleWithDetails,
 } from "./types";
@@ -773,4 +775,124 @@ export function yearOverYearChange(current: number, previous: number): number | 
 export function targetProgress(actual: number, target: number): number {
   if (target === 0) return 0;
   return (actual / target) * 100;
+}
+
+// ============================================================================
+// Fiscal years
+//
+// Gigeez runs on fiscal years ending 31 March, so April 2025 to March 2026 is
+// FY2026 — the same basis the HIST tab uses when it says "FY25", and the basis
+// the business plan is built on. (The plan's first year matches that year's
+// actual revenue almost exactly, which is what ties the two together.)
+//
+// This matters: comparing a calendar year against a plan year would be
+// comparing two different twelve-month windows.
+// ============================================================================
+
+/** The fiscal year an ISO date falls in. "2025-04-01" -> 2026. */
+export function fiscalYearOf(isoDate: string): number {
+  const year = Number(isoDate.slice(0, 4));
+  const month = Number(isoDate.slice(5, 7));
+  return month >= 4 ? year + 1 : year;
+}
+
+/** The April-to-March window of a fiscal year, as ISO dates. */
+export function fiscalYearRange(fiscalYear: number): DateRange {
+  return { from: `${fiscalYear - 1}-04-01`, to: `${fiscalYear}-03-31` };
+}
+
+/** "FY26", the short form used on axes and in headings. */
+export function formatFiscalYear(fiscalYear: number): string {
+  return `FY${String(fiscalYear).slice(2)}`;
+}
+
+/** "Apr 2025 – Mar 2026", spelled out so nobody has to guess the basis. */
+export function describeFiscalYear(fiscalYear: number): string {
+  return `Apr ${fiscalYear - 1} – Mar ${fiscalYear}`;
+}
+
+/** One year of the business, from whichever source actually covers it. */
+export interface YearComparison {
+  fiscalYear: number;
+  /** "FY26" */
+  label: string;
+  /** "Apr 2025 – Mar 2026" */
+  rangeLabel: string;
+  revenue: number;
+  /** The HIST tab never recorded unit counts, so earlier years have none. */
+  units: number | null;
+  costs: number | null;
+  ebitda: number | null;
+  /** Business-plan revenue target for the year, when the plan covers it. */
+  target: number | null;
+  percentOfTarget: number | null;
+  source: "hist" | "pnl";
+  /** False for a year still in progress, or one the sheet only partly covers. */
+  complete: boolean;
+  monthsWithData: number;
+}
+
+/**
+ * Every year we can say anything about, oldest first: the HIST tab for the
+ * years before the monthly sheet begins, the monthly sheet after that, and the
+ * business plan alongside both.
+ *
+ * Where both sources cover a year the monthly sheet wins, since it is the more
+ * detailed record.
+ */
+export function buildYearComparisons(
+  months: FinancialMonth[],
+  historic: HistoricYear[],
+  targets: BpTarget[]
+): YearComparison[] {
+  const targetByYear = new Map(targets.map((t) => [t.year, t]));
+
+  const fromMonths = new Map<number, { revenue: number; units: number; costs: number; count: number }>();
+  for (const m of months) {
+    const fy = fiscalYearOf(m.month);
+    const acc = fromMonths.get(fy) ?? { revenue: 0, units: 0, costs: 0, count: 0 };
+    acc.revenue += m.revenue;
+    acc.units += m.units;
+    acc.costs += m.cost_production + m.cost_commercial + m.cost_marketing + m.cost_admin;
+    acc.count += 1;
+    fromMonths.set(fy, acc);
+  }
+
+  const years = new Set<number>([...fromMonths.keys(), ...historic.map((h) => h.fiscal_year)]);
+
+  return [...years]
+    .sort((a, b) => a - b)
+    .map((fiscalYear) => {
+      const monthly = fromMonths.get(fiscalYear);
+      const hist = historic.find((h) => h.fiscal_year === fiscalYear);
+      const target = targetByYear.get(fiscalYear) ?? null;
+
+      const base = monthly
+        ? {
+            revenue: monthly.revenue,
+            units: monthly.units,
+            costs: monthly.costs,
+            ebitda: null,
+            source: "pnl" as const,
+            monthsWithData: monthly.count,
+          }
+        : {
+            revenue: hist!.revenue,
+            units: null,
+            costs: null,
+            ebitda: hist!.ebitda,
+            source: "hist" as const,
+            monthsWithData: 12,
+          };
+
+      return {
+        fiscalYear,
+        label: formatFiscalYear(fiscalYear),
+        rangeLabel: describeFiscalYear(fiscalYear),
+        ...base,
+        target: target?.revenue ?? null,
+        percentOfTarget: target && target.revenue > 0 ? (base.revenue / target.revenue) * 100 : null,
+        complete: base.monthsWithData >= 12,
+      };
+    });
 }

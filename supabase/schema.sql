@@ -174,7 +174,7 @@ create table if not exists expenses (
   category text not null check (
     category in (
       'materials', 'manufacturing', 'shipping', 'packaging', 'marketing',
-      'rent', 'utilities', 'salaries', 'software', 'other'
+      'rent', 'utilities', 'salaries', 'software', 'travel', 'other'
     )
   ),
   amount numeric(10, 2) not null check (amount >= 0),
@@ -184,6 +184,23 @@ create table if not exists expenses (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+-- Backfill for databases created before "travel" was a category: on an
+-- existing table the "create table if not exists" above is a no-op, so the
+-- check constraint has to be replaced explicitly.
+do $$
+begin
+  if exists (select 1 from pg_constraint where conname = 'expenses_category_check') then
+    alter table expenses drop constraint expenses_category_check;
+  end if;
+  alter table expenses add constraint expenses_category_check
+    check (
+      category in (
+        'materials', 'manufacturing', 'shipping', 'packaging', 'marketing',
+        'rent', 'utilities', 'salaries', 'software', 'travel', 'other'
+      )
+    );
+end $$;
 
 create index if not exists expenses_expense_date_idx on expenses (expense_date);
 create index if not exists expenses_category_idx on expenses (category);
@@ -283,6 +300,29 @@ create table if not exists bp_targets (
 create index if not exists bp_targets_year_idx on bp_targets (year);
 
 -- ----------------------------------------------------------------------------
+-- 11. historic_years — the HIST tab: fiscal years ending 31 March
+--
+-- Predates the monthly P&L sheet, which only starts in April 2025, so these
+-- are the only figures available for the earlier years. No unit counts: the
+-- HIST tab never recorded them. Amounts in QAR.
+-- ----------------------------------------------------------------------------
+create table if not exists historic_years (
+  id uuid primary key default gen_random_uuid(),
+  fiscal_year integer not null unique check (fiscal_year between 2000 and 2100),
+  revenue numeric(12, 2) not null default 0,
+  cogs numeric(12, 2) not null default 0,
+  gross_profit numeric(12, 2) not null default 0,
+  ebitda numeric(12, 2) not null default 0,
+  inventories numeric(12, 2) not null default 0,
+  net_cash numeric(12, 2) not null default 0,
+  net_equity numeric(12, 2) not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists historic_years_fiscal_year_idx on historic_years (fiscal_year);
+
+-- ----------------------------------------------------------------------------
 -- Stock adjustment helper — called from the app whenever a sale, refund, or
 -- received purchase order needs to move a variant's stock_quantity. Doing
 -- this as a single atomic UPDATE avoids a read-then-write race between two
@@ -320,7 +360,8 @@ begin
   for t in
     select unnest(array[
       'products', 'variants', 'stock_units', 'suppliers', 'sales', 'expenses',
-      'purchase_orders', 'goals', 'monthly_notes', 'financial_months', 'bp_targets'
+      'purchase_orders', 'goals', 'monthly_notes', 'financial_months', 'bp_targets',
+      'historic_years'
     ])
   loop
     execute format(
@@ -447,6 +488,7 @@ alter table goals enable row level security;
 alter table monthly_notes enable row level security;
 alter table financial_months enable row level security;
 alter table bp_targets enable row level security;
+alter table historic_years enable row level security;
 
 do $$
 declare
@@ -455,7 +497,8 @@ begin
   for t in
     select unnest(array[
       'products', 'variants', 'stock_units', 'suppliers', 'sales', 'expenses',
-      'purchase_orders', 'goals', 'monthly_notes', 'financial_months', 'bp_targets'
+      'purchase_orders', 'goals', 'monthly_notes', 'financial_months', 'bp_targets',
+      'historic_years'
     ])
   loop
     execute format('drop policy if exists "authenticated full access" on %I;', t);

@@ -3,7 +3,7 @@ import { getExpensesInRange } from "@/lib/data/expenses";
 import { getInventory } from "@/lib/data/inventory";
 import { getReceivedPOsInRange } from "@/lib/data/purchaseOrders";
 import { getAllGoals } from "@/lib/data/goals";
-import { getFinancialMonths, getBpTargets } from "@/lib/data/financials";
+import { getFinancialMonths, getBpTargets, getHistoricYears } from "@/lib/data/financials";
 import { parseCurrencyParam } from "@/lib/currency";
 import {
   parseDateRangeParams,
@@ -31,6 +31,7 @@ import {
   countOrders,
   averageOrderValue,
   totalFinancialYear,
+  buildYearComparisons,
 } from "@/lib/calculations";
 import { Card, CardHeader, CardTitle } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -38,6 +39,7 @@ import { KpiCard } from "@/components/dashboard/KpiCard";
 import { ProductPerformanceList } from "@/components/dashboard/ProductPerformanceList";
 import { GoalProgressBar } from "@/components/dashboard/GoalProgressBar";
 import { FinancialsSection } from "@/components/dashboard/FinancialsSection";
+import { YearComparisonChart } from "@/components/charts/YearComparisonChart";
 import { RevenueLineChart } from "@/components/charts/RevenueLineChart";
 import { ExpensePieChart } from "@/components/charts/ExpensePieChart";
 import { ProfitTrendChart } from "@/components/charts/ProfitTrendChart";
@@ -68,6 +70,7 @@ export default async function DashboardHomePage({
     allTimeSales,
     financialMonths,
     bpTargets,
+    historicYears,
   ] = await Promise.all([
     getSalesInRange(range),
     getSalesInRange(previousRange),
@@ -79,6 +82,7 @@ export default async function DashboardHomePage({
     getAllSales(),
     getFinancialMonths(),
     getBpTargets(),
+    getHistoricYears(),
   ]);
 
   // The spreadsheet financials stand on their own, keyed to the most recent
@@ -95,8 +99,9 @@ export default async function DashboardHomePage({
     previousFinancialYearTotals && previousFinancialYearTotals.monthsWithData > 0
       ? previousFinancialYearTotals
       : null;
-  const financialTarget =
-    financialYear !== null ? (bpTargets.find((t) => t.year === financialYear) ?? null) : null;
+  // Year on year across the whole history, on fiscal years — the basis the
+  // business plan uses, and the only one the HIST tab's earlier years exist on.
+  const yearComparisons = buildYearComparisons(financialMonths, historicYears, bpTargets);
 
   // Lifetime totals, independent of the date-range filter above — includes
   // historical sales with an unknown date (e.g. imported stock already
@@ -208,9 +213,28 @@ export default async function DashboardHomePage({
           months={financialMonths.filter((m) => m.month.startsWith(`${financialYear}-`))}
           totals={financialTotals}
           previousTotals={previousFinancialTotals}
-          target={financialTarget}
           currency={currency}
         />
+      )}
+
+      {yearComparisons.length > 1 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Year by year</CardTitle>
+          </CardHeader>
+          <p className="-mt-4 mb-5 text-xs text-ink/40">
+            Fiscal years ending 31 March. Revenue up to FY25 comes from the HIST tab of your spreadsheet, which
+            recorded no unit counts, so the dress line starts at FY26 where the monthly sheet begins.
+          </p>
+          <YearComparisonChart
+            data={yearComparisons.map((y) => ({
+              label: y.label,
+              rangeLabel: y.rangeLabel,
+              revenue: y.revenue,
+              units: y.units,
+            }))}
+          />
+        </Card>
       )}
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">

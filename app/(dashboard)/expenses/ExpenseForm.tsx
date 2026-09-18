@@ -1,12 +1,13 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { FormField, Input, Select, Textarea } from "@/components/ui/Field";
 import { Button } from "@/components/ui/Button";
 import type { FormState } from "@/lib/actions/expenses";
 import type { Expense } from "@/lib/types";
 import { EXPENSE_CATEGORIES } from "@/lib/types";
 import { toTitleCase } from "@/lib/utils";
+import { BASE_CURRENCY, CURRENCIES, convertToBase, formatMoney, type Currency } from "@/lib/currency";
 
 const initialState: FormState = { error: null };
 
@@ -20,6 +21,14 @@ export function ExpenseForm({
   submitLabel: string;
 }) {
   const [state, formAction, pending] = useActionState(action, initialState);
+  // Amounts are stored in QAR. Typing one in euros or dollars is a convenience
+  // for invoices that arrive that way; the server does the conversion, and the
+  // preview below the field shows what will actually be saved.
+  const [currency, setCurrency] = useState<Currency>(BASE_CURRENCY);
+  const [amount, setAmount] = useState(String(defaultValues?.amount ?? ""));
+
+  const entered = Number(amount);
+  const showsConversion = currency !== BASE_CURRENCY && Number.isFinite(entered) && amount.trim() !== "";
 
   return (
     <form action={formAction} className="max-w-xl space-y-5">
@@ -33,8 +42,38 @@ export function ExpenseForm({
             defaultValue={defaultValues?.expense_date ?? new Date().toISOString().slice(0, 10)}
           />
         </FormField>
-        <FormField label="Amount ($)" htmlFor="amount">
-          <Input id="amount" name="amount" type="number" min={0} step="0.01" required defaultValue={defaultValues?.amount ?? ""} />
+        <FormField
+          label="Amount"
+          htmlFor="amount"
+          hint={showsConversion ? `Saves as ${formatMoney(convertToBase(entered, currency))}` : "Saved in QAR"}
+        >
+          <div className="flex gap-2">
+            <Input
+              id="amount"
+              name="amount"
+              type="number"
+              min={0}
+              step="0.01"
+              required
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              className="flex-1"
+            />
+            <Select
+              id="currency"
+              name="currency"
+              aria-label="Currency of the amount entered"
+              value={currency}
+              onChange={(e) => setCurrency(e.target.value as Currency)}
+              className="w-24 shrink-0"
+            >
+              {CURRENCIES.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </Select>
+          </div>
         </FormField>
       </div>
 

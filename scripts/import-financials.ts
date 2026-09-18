@@ -53,11 +53,23 @@ interface ImportTarget {
   ebitda: number;
 }
 
+interface ImportHistoricYear {
+  fiscal_year: number;
+  revenue: number;
+  cogs: number;
+  gross_profit: number;
+  ebitda: number;
+  inventories: number;
+  net_cash: number;
+  net_equity: number;
+}
+
 interface ImportFile {
   source_file: string;
   base_currency: string;
   monthly: ImportMonth[];
   bp_targets: ImportTarget[];
+  historic_years?: ImportHistoricYear[];
 }
 
 const fileArg = process.argv.slice(2).find((a) => !a.startsWith("--"));
@@ -75,8 +87,8 @@ async function main() {
   }
 
   console.log(
-    `Loaded ${raw.monthly.length} months and ${raw.bp_targets.length} target years from ${DATA_FILE} ` +
-      `(source: ${raw.source_file})`
+    `Loaded ${raw.monthly.length} months, ${raw.bp_targets.length} target years and ` +
+      `${raw.historic_years?.length ?? 0} historic years from ${DATA_FILE} (source: ${raw.source_file})`
   );
 
   const months = raw.monthly.map((m) => ({
@@ -108,6 +120,15 @@ async function main() {
     .upsert(targets, { onConflict: "year" });
   if (targetsError) throw targetsError;
   console.log(`${targets.length} target years upserted into bp_targets.`);
+
+  const historic = raw.historic_years ?? [];
+  if (historic.length) {
+    const { error: historicError } = await supabase
+      .from("historic_years")
+      .upsert(historic, { onConflict: "fiscal_year" });
+    if (historicError) throw historicError;
+    console.log(`${historic.length} historic years upserted into historic_years.`);
+  }
 
   console.log("Done. Sales, expenses and stock were not touched.");
 }

@@ -4,16 +4,29 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { EXPENSE_CATEGORIES, type CostType, type ExpenseCategory } from "@/lib/types";
+import { CURRENCIES, convertToBase, type Currency } from "@/lib/currency";
 
 export interface FormState {
   error: string | null;
 }
 
+/**
+ * Amounts are always stored in QAR. The form lets an amount be typed in EUR or
+ * USD for convenience — a supplier invoice in euros, say — and it is converted
+ * here, on the server, so nothing but QAR ever reaches the database.
+ */
 function parseExpenseForm(formData: FormData) {
+  const rawCurrency = String(formData.get("currency") ?? "QAR").toUpperCase();
+  const currency = (CURRENCIES as readonly string[]).includes(rawCurrency)
+    ? (rawCurrency as Currency)
+    : "QAR";
+  const entered = Number(formData.get("amount"));
+  const amount = Number.isFinite(entered) ? Number(convertToBase(entered, currency).toFixed(2)) : entered;
+
   return {
     expense_date: String(formData.get("expense_date") ?? ""),
     category: String(formData.get("category") ?? "") as ExpenseCategory,
-    amount: Number(formData.get("amount")),
+    amount,
     cost_type: String(formData.get("cost_type") ?? "variable") as CostType,
     vendor: String(formData.get("vendor") ?? "").trim() || null,
     notes: String(formData.get("notes") ?? "").trim() || null,
