@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { formatCurrency, formatDate, toTitleCase, cn } from "@/lib/utils";
+import { useCurrency } from "@/lib/useCurrency";
 import type { SaleWithDetails } from "@/lib/types";
 import { Badge } from "@/components/ui/Badge";
 import { LinkButton } from "@/components/ui/Button";
@@ -24,6 +25,8 @@ export function SalesTable({
   deleteSale: (id: string) => Promise<void>;
   searchPlaceholder?: string;
 }) {
+  const currency = useCurrency();
+
   const [query, setQuery] = useState("");
 
   const filtered = useMemo(() => {
@@ -93,7 +96,7 @@ export function SalesTable({
                     {s.sold_from && <div className="mt-0.5 font-sans text-[11px] text-ink/40">Sold from: {s.sold_from}</div>}
                   </Td>
                   <Td>{s.quantity}</Td>
-                  <Td>{formatCurrency(s.unit_price)}</Td>
+                  <Td>{formatCurrency(s.unit_price, currency)}</Td>
                   <Td>
                     {s.channel === "unknown" ? (
                       <Badge variant="neutral" title="No sale channel was recorded for this piece">
@@ -108,8 +111,8 @@ export function SalesTable({
                       </Badge>
                     )}
                   </Td>
-                  <Td className={cn("font-medium", s.revenue < 0 ? "text-red-600" : "text-ink")}>{formatCurrency(s.revenue)}</Td>
-                  <Td className={cn("font-medium", s.profit < 0 ? "text-red-600" : "text-emerald-700")}>{formatCurrency(s.profit)}</Td>
+                  <Td className={cn("font-medium", s.revenue < 0 ? "text-red-600" : "text-ink")}>{formatCurrency(s.revenue, currency)}</Td>
+                  <Td className={cn("font-medium", s.profit < 0 ? "text-red-600" : "text-emerald-700")}>{formatCurrency(s.profit, currency)}</Td>
                   <Td>
                     <div className="flex items-center justify-end gap-1">
                       <LinkButton href={`/sales/${s.id}/edit`} variant="ghost" size="sm">

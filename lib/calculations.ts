@@ -24,8 +24,11 @@ import {
   startOfWeek,
 } from "date-fns";
 import type {
+  BpTarget,
   Expense,
+  FinancialMonth,
   Goal,
+  HistoricYear,
   InventoryRow,
   SaleWithDetails,
 } from "./types";
@@ -181,6 +184,89 @@ export function calculateKpiSummary(
   };
 }
 
+/** The spreadsheet months whose month falls inside a date range. */
+export function financialMonthsInRange(months: FinancialMonth[], range: DateRange): FinancialMonth[] {
+  return months.filter((m) => m.month >= range.from && m.month <= range.to);
+}
+
+/**
+ * The same months shifted back by `monthsBack`, for a like-for-like comparison.
+ *
+ * The date-range version of "the previous period" is a window of days, which
+ * lines up badly with a monthly sheet: a range of 1–18 September has a
+ * previous period of mid-to-late August and so picks up no month at all.
+ * Comparing September against August, and against September last year, is
+ * what someone reading the cards actually means.
+ */
+export function shiftFinancialMonths(
+  all: FinancialMonth[],
+  current: FinancialMonth[],
+  monthsBack: number
+): FinancialMonth[] {
+  if (current.length === 0) return [];
+  const byMonth = new Map(all.map((m) => [m.month.slice(0, 7), m]));
+  const shifted: FinancialMonth[] = [];
+  for (const m of current) {
+    const key = format(addMonths(parseISO(m.month), -monthsBack), "yyyy-MM");
+    const found = byMonth.get(key);
+    if (found) shifted.push(found);
+  }
+  return shifted;
+}
+
+/**
+ * The same four headline cards, built from the profit-and-loss spreadsheet
+ * instead of from individual sales.
+ *
+ * Used whenever the sheet covers the selected range, because it records every
+ * sale while `sales` holds only the pieces the stock sheet happened to capture
+ * — and none of those carry a date. Two of the cards mean something slightly
+ * different here and the dashboard relabels them: the sheet counts dresses
+ * rather than orders, so "orders" is a dress count and "aov" is the average
+ * price a dress went out at. Profit is revenue less all four cost bands, the
+ * same cash net shown in the financials section.
+ */
+export function calculateSpreadsheetKpiSummary(
+  current: FinancialMonth[],
+  previousPeriod: FinancialMonth[] | null,
+  yoy: FinancialMonth[] | null
+): KpiSummary {
+  const revenueOf = (months: FinancialMonth[]) => months.reduce((t, m) => t + m.revenue, 0);
+  const unitsOf = (months: FinancialMonth[]) => months.reduce((t, m) => t + m.units, 0);
+  const profitOf = (months: FinancialMonth[]) =>
+    months.reduce(
+      (t, m) => t + m.revenue - (m.cost_production + m.cost_commercial + m.cost_marketing + m.cost_admin),
+      0
+    );
+  const perUnitOf = (months: FinancialMonth[]) => {
+    const units = unitsOf(months);
+    return units === 0 ? 0 : revenueOf(months) / units;
+  };
+
+  return {
+    revenue: buildKpiTrend(
+      revenueOf(current),
+      previousPeriod ? revenueOf(previousPeriod) : null,
+      yoy ? revenueOf(yoy) : null
+    ),
+    profit: buildKpiTrend(
+      profitOf(current),
+      previousPeriod ? profitOf(previousPeriod) : null,
+      yoy ? profitOf(yoy) : null
+    ),
+    orderCount: buildKpiTrend(
+      unitsOf(current),
+      previousPeriod ? unitsOf(previousPeriod) : null,
+      yoy ? unitsOf(yoy) : null
+    ),
+    aov: buildKpiTrend(
+      perUnitOf(current),
+      previousPeriod ? perUnitOf(previousPeriod) : null,
+      yoy ? perUnitOf(yoy) : null
+    ),
+  };
+}
+
 // ============================================================================
 // Section 4 — breakdowns (by channel, by category, best/worst products)
 // ============================================================================
@@ -285,6 +371,22 @@ export interface PnLRow {
   netMarginPct: number;
 }
 
+/**
+ * The months the profit-and-loss spreadsheet covers, keyed "yyyy-MM".
+ *
+ * For any month in here the spreadsheet is the record of the business, and
+ * the piece-level `sales` and imported `expenses` rows are left out of the
+ * period totals so nothing is counted twice. See `buildProfitAndLoss`.
+ */
+function spreadsheetMonthKeys(months: FinancialMonth[]): Set<string> {
+  return new Set(months.map((m) => m.month.slice(0, 7)));
+}
+
+/** An expense row created by `npm run import-financials` rather than by hand. */
+function isSpreadsheetExpense(expense: Expense): boolean {
+  return typeof expense.source_ref === "string" && expense.source_ref.startsWith("pnl:");
+}
+
 function periodKey(dateStr: string, grouping: PnLGrouping): { key: string; label: string; start: string } {
   const d = parseISO(dateStr);
   if (grouping === "year") {
@@ -323,7 +425,8 @@ function periodKey(dateStr: string, grouping: PnLGrouping): { key: string; label
 export function buildProfitAndLoss(
   sales: SaleWithDetails[],
   expenses: Expense[],
-  grouping: PnLGrouping
+  grouping: PnLGrouping,
+  financialMonths: FinancialMonth[] = []
 ): PnLRow[] {
   interface Acc {
     label: string;
@@ -333,9 +436,15 @@ export function buildProfitAndLoss(
     operatingExpenses: number;
   }
   const map = new Map<string, Acc>();
+  const covered = spreadsheetMonthKeys(financialMonths);
+  const isCovered = (isoDate: string) => covered.has(isoDate.slice(0, 7));
 
   for (const s of sales) {
     if (!s.sale_date) continue; // unknown-date historical sales aren't attributable to a period
+    // The spreadsheet already states this month's revenue in full, and it
+    // counts sales this table has never seen. Adding the piece-level rows on
+    // top would count the same dresses twice.
+    if (isCovered(s.sale_date)) continue;
     const { key, label, start } = periodKey(s.sale_date, grouping);
     const row = map.get(key) ?? { label, start, revenue: 0, cogs: 0, operatingExpenses: 0 };
     row.revenue += s.revenue;
@@ -344,9 +453,26 @@ export function buildProfitAndLoss(
   }
 
   for (const e of expenses) {
+    // Same again on the cost side: in a covered month the four cost bands
+    // below are the sheet's own totals, and these rows are what those totals
+    // were split into. Anything entered by hand still counts.
+    if (isCovered(e.expense_date) && isSpreadsheetExpense(e)) continue;
     const { key, label, start } = periodKey(e.expense_date, grouping);
     const row = map.get(key) ?? { label, start, revenue: 0, cogs: 0, operatingExpenses: 0 };
     row.operatingExpenses += e.amount;
+    map.set(key, row);
+  }
+
+  // The spreadsheet's own monthly figures. Production is the closest thing the
+  // sheet has to cost of goods sold, so it sits in COGS and the other three
+  // bands are operating expenses — which makes net profit here the same number
+  // as the cash net on the dashboard.
+  for (const m of financialMonths) {
+    const { key, label, start } = periodKey(m.month, grouping);
+    const row = map.get(key) ?? { label, start, revenue: 0, cogs: 0, operatingExpenses: 0 };
+    row.revenue += m.revenue;
+    row.cogs += m.cost_production;
+    row.operatingExpenses += m.cost_commercial + m.cost_marketing + m.cost_admin;
     map.set(key, row);
   }
 
@@ -402,7 +528,8 @@ export function buildCashFlow(
   sales: SaleWithDetails[],
   expenses: Expense[],
   grouping: PnLGrouping,
-  startingBalance = 0
+  startingBalance = 0,
+  financialMonths: FinancialMonth[] = []
 ): CashFlowRow[] {
   interface Acc {
     label: string;
@@ -411,18 +538,32 @@ export function buildCashFlow(
     cashOut: number;
   }
   const map = new Map<string, Acc>();
+  const covered = spreadsheetMonthKeys(financialMonths);
+  const isCovered = (isoDate: string) => covered.has(isoDate.slice(0, 7));
 
   for (const s of sales) {
     if (!s.sale_date) continue; // unknown-date historical sales aren't attributable to a period
+    if (isCovered(s.sale_date)) continue; // the sheet already states this month in full
     const { key, label, start } = periodKey(s.sale_date, grouping);
     const row = map.get(key) ?? { label, start, cashIn: 0, cashOut: 0 };
     row.cashIn += s.revenue;
     map.set(key, row);
   }
   for (const e of expenses) {
+    if (isCovered(e.expense_date) && isSpreadsheetExpense(e)) continue;
     const { key, label, start } = periodKey(e.expense_date, grouping);
     const row = map.get(key) ?? { label, start, cashIn: 0, cashOut: 0 };
     row.cashOut += e.amount;
+    map.set(key, row);
+  }
+
+  // The sheet's cost bands are cash paid in the month, which is exactly what
+  // this table wants.
+  for (const m of financialMonths) {
+    const { key, label, start } = periodKey(m.month, grouping);
+    const row = map.get(key) ?? { label, start, cashIn: 0, cashOut: 0 };
+    row.cashIn += m.revenue;
+    row.cashOut += m.cost_production + m.cost_commercial + m.cost_marketing + m.cost_admin;
     map.set(key, row);
   }
 
@@ -659,4 +800,237 @@ export function calculateGoalProgress(
   else if (paceRatio >= 0.7) status = "at-risk";
 
   return { actual, target: goal.target_amount, percentOfTarget, percentOfPeriodElapsed, status, periodEnd: range.to };
+}
+
+// ============================================================================
+// Spreadsheet financials
+//
+// These work on the monthly rows imported from the Gigeez P&L sheet, not on
+// the `sales` / `expenses` tables. The two record the same business in
+// different ways, so figures from one are never mixed into the other.
+// ============================================================================
+
+export interface FinancialMonthSummary {
+  month: string;
+  /** Short label for charts, e.g. "Jan". */
+  periodLabel: string;
+  units: number;
+  revenue: number;
+  costProduction: number;
+  costCommercial: number;
+  costMarketing: number;
+  costAdmin: number;
+  totalCosts: number;
+  /**
+   * Revenue less the cash paid out that month. This is not accounting profit:
+   * the spreadsheet's costs are what was spent in the month, not the cost of
+   * the pieces sold in it, so a month can look deeply negative simply because
+   * a production run or an exhibition was paid for up front.
+   */
+  cashNet: number;
+}
+
+export interface FinancialYearTotals {
+  year: number;
+  units: number;
+  revenue: number;
+  costProduction: number;
+  costCommercial: number;
+  costMarketing: number;
+  costAdmin: number;
+  totalCosts: number;
+  cashNet: number;
+  /** Months that actually carry data, used to label partial years honestly. */
+  monthsWithData: number;
+  firstMonth: string | null;
+  lastMonth: string | null;
+}
+
+export function summarizeFinancialMonth(row: FinancialMonth): FinancialMonthSummary {
+  const totalCosts =
+    row.cost_production + row.cost_commercial + row.cost_marketing + row.cost_admin;
+  return {
+    month: row.month,
+    periodLabel: format(parseISO(row.month), "MMM"),
+    units: row.units,
+    revenue: row.revenue,
+    costProduction: row.cost_production,
+    costCommercial: row.cost_commercial,
+    costMarketing: row.cost_marketing,
+    costAdmin: row.cost_admin,
+    totalCosts,
+    cashNet: row.revenue - totalCosts,
+  };
+}
+
+export function summarizeFinancialMonths(rows: FinancialMonth[]): FinancialMonthSummary[] {
+  return rows.map(summarizeFinancialMonth);
+}
+
+export function totalFinancialYear(year: number, rows: FinancialMonth[]): FinancialYearTotals {
+  const months = rows.filter((r) => r.month.startsWith(`${year}-`));
+  const totals = months.reduce(
+    (acc, r) => {
+      acc.units += r.units;
+      acc.revenue += r.revenue;
+      acc.costProduction += r.cost_production;
+      acc.costCommercial += r.cost_commercial;
+      acc.costMarketing += r.cost_marketing;
+      acc.costAdmin += r.cost_admin;
+      return acc;
+    },
+    {
+      units: 0,
+      revenue: 0,
+      costProduction: 0,
+      costCommercial: 0,
+      costMarketing: 0,
+      costAdmin: 0,
+    }
+  );
+
+  const totalCosts =
+    totals.costProduction + totals.costCommercial + totals.costMarketing + totals.costAdmin;
+
+  return {
+    year,
+    ...totals,
+    totalCosts,
+    cashNet: totals.revenue - totalCosts,
+    monthsWithData: months.length,
+    firstMonth: months[0]?.month ?? null,
+    lastMonth: months[months.length - 1]?.month ?? null,
+  };
+}
+
+/** Percentage change between two years' figures, or null when there's no base to compare against. */
+export function yearOverYearChange(current: number, previous: number): number | null {
+  if (previous === 0) return null;
+  return ((current - previous) / Math.abs(previous)) * 100;
+}
+
+/** Progress of a year's actual revenue against its business-plan target. */
+export function targetProgress(actual: number, target: number): number {
+  if (target === 0) return 0;
+  return (actual / target) * 100;
+}
+
+// ============================================================================
+// Fiscal years
+//
+// Gigeez runs on fiscal years ending 31 March, so April 2025 to March 2026 is
+// FY2026 — the same basis the HIST tab uses when it says "FY25", and the basis
+// the business plan is built on. (The plan's first year matches that year's
+// actual revenue almost exactly, which is what ties the two together.)
+//
+// This matters: comparing a calendar year against a plan year would be
+// comparing two different twelve-month windows.
+// ============================================================================
+
+/** The fiscal year an ISO date falls in. "2025-04-01" -> 2026. */
+export function fiscalYearOf(isoDate: string): number {
+  const year = Number(isoDate.slice(0, 4));
+  const month = Number(isoDate.slice(5, 7));
+  return month >= 4 ? year + 1 : year;
+}
+
+/** The April-to-March window of a fiscal year, as ISO dates. */
+export function fiscalYearRange(fiscalYear: number): DateRange {
+  return { from: `${fiscalYear - 1}-04-01`, to: `${fiscalYear}-03-31` };
+}
+
+/** "FY26", the short form used on axes and in headings. */
+export function formatFiscalYear(fiscalYear: number): string {
+  return `FY${String(fiscalYear).slice(2)}`;
+}
+
+/** "Apr 2025 – Mar 2026", spelled out so nobody has to guess the basis. */
+export function describeFiscalYear(fiscalYear: number): string {
+  return `Apr ${fiscalYear - 1} – Mar ${fiscalYear}`;
+}
+
+/** One year of the business, from whichever source actually covers it. */
+export interface YearComparison {
+  fiscalYear: number;
+  /** "FY26" */
+  label: string;
+  /** "Apr 2025 – Mar 2026" */
+  rangeLabel: string;
+  revenue: number;
+  /** The HIST tab never recorded unit counts, so earlier years have none. */
+  units: number | null;
+  costs: number | null;
+  ebitda: number | null;
+  /** Business-plan revenue target for the year, when the plan covers it. */
+  target: number | null;
+  percentOfTarget: number | null;
+  source: "hist" | "pnl";
+  /** False for a year still in progress, or one the sheet only partly covers. */
+  complete: boolean;
+  monthsWithData: number;
+}
+
+/**
+ * Every year we can say anything about, oldest first: the HIST tab for the
+ * years before the monthly sheet begins, the monthly sheet after that, and the
+ * business plan alongside both.
+ *
+ * Where both sources cover a year the monthly sheet wins, since it is the more
+ * detailed record.
+ */
+export function buildYearComparisons(
+  months: FinancialMonth[],
+  historic: HistoricYear[],
+  targets: BpTarget[]
+): YearComparison[] {
+  const targetByYear = new Map(targets.map((t) => [t.year, t]));
+
+  const fromMonths = new Map<number, { revenue: number; units: number; costs: number; count: number }>();
+  for (const m of months) {
+    const fy = fiscalYearOf(m.month);
+    const acc = fromMonths.get(fy) ?? { revenue: 0, units: 0, costs: 0, count: 0 };
+    acc.revenue += m.revenue;
+    acc.units += m.units;
+    acc.costs += m.cost_production + m.cost_commercial + m.cost_marketing + m.cost_admin;
+    acc.count += 1;
+    fromMonths.set(fy, acc);
+  }
+
+  const years = new Set<number>([...fromMonths.keys(), ...historic.map((h) => h.fiscal_year)]);
+
+  return [...years]
+    .sort((a, b) => a - b)
+    .map((fiscalYear) => {
+      const monthly = fromMonths.get(fiscalYear);
+      const hist = historic.find((h) => h.fiscal_year === fiscalYear);
+      const target = targetByYear.get(fiscalYear) ?? null;
+
+      const base = monthly
+        ? {
+            revenue: monthly.revenue,
+            units: monthly.units,
+            costs: monthly.costs,
+            ebitda: null,
+            source: "pnl" as const,
+            monthsWithData: monthly.count,
+          }
+        : {
+            revenue: hist!.revenue,
+            units: null,
+            costs: null,
+            ebitda: hist!.ebitda,
+            source: "hist" as const,
+            monthsWithData: 12,
+          };
+
+      return {
+        fiscalYear,
+        label: formatFiscalYear(fiscalYear),
+        rangeLabel: describeFiscalYear(fiscalYear),
+        ...base,
+        target: target?.revenue ?? null,
+        percentOfTarget: target && target.revenue > 0 ? (base.revenue / target.revenue) * 100 : null,
+        complete: base.monthsWithData >= 12,
+      };
+    });
 }

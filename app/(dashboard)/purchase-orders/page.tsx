@@ -1,6 +1,7 @@
 import { getAllPurchaseOrders } from "@/lib/data/purchaseOrders";
 import { deletePurchaseOrder, receivePurchaseOrder } from "@/lib/actions/purchaseOrders";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { parseCurrencyParam } from "@/lib/currency";
 import { Card } from "@/components/ui/Card";
 import { LinkButton, Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
@@ -8,7 +9,12 @@ import { Table, Thead, Th, Tr, Td } from "@/components/ui/Table";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ConfirmSubmitButton } from "@/components/ui/ConfirmSubmitButton";
 
-export default async function PurchaseOrdersPage() {
+export default async function PurchaseOrdersPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const currency = parseCurrencyParam(await searchParams);
   const orders = await getAllPurchaseOrders();
 
   return (
@@ -54,8 +60,8 @@ export default async function PurchaseOrdersPage() {
                   </Td>
                   <Td>{po.supplier?.name ?? "—"}</Td>
                   <Td>{po.quantity_ordered}</Td>
-                  <Td>{formatCurrency(po.unit_cost)}</Td>
-                  <Td className="font-medium text-ink">{formatCurrency(po.unit_cost * po.quantity_ordered)}</Td>
+                  <Td>{formatCurrency(po.unit_cost, currency)}</Td>
+                  <Td className="font-medium text-ink">{formatCurrency(po.unit_cost * po.quantity_ordered, currency)}</Td>
                   <Td>
                     {po.received ? (
                       <Badge variant="success">Received{po.received_at ? ` ${formatDate(po.received_at.slice(0, 10))}` : ""}</Badge>

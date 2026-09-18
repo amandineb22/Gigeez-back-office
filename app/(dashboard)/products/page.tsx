@@ -1,12 +1,18 @@
 import { getAllProducts } from "@/lib/data/products";
 import { createClient } from "@/lib/supabase/server";
 import { formatCurrency } from "@/lib/utils";
+import { parseCurrencyParam } from "@/lib/currency";
 import { Card } from "@/components/ui/Card";
 import { LinkButton } from "@/components/ui/Button";
 import { Table, Thead, Th, Tr, Td } from "@/components/ui/Table";
 import { EmptyState } from "@/components/ui/EmptyState";
 
-export default async function ProductsPage() {
+export default async function ProductsPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const currency = parseCurrencyParam(await searchParams);
   const products = await getAllProducts();
   const supabase = await createClient();
   const { data: variants } = await supabase.from("variants").select("product_id, stock_quantity");
@@ -55,7 +61,7 @@ export default async function ProductsPage() {
                   <Tr key={p.id}>
                     <Td className="font-medium text-ink">{p.name}</Td>
                     <Td>{p.category}</Td>
-                    <Td>{formatCurrency(p.base_cost)}</Td>
+                    <Td>{formatCurrency(p.base_cost, currency)}</Td>
                     <Td>{stats.skuCount}</Td>
                     <Td>{stats.totalStock}</Td>
                     <Td>

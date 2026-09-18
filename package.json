@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "seed": "tsx scripts/seed.ts",
-    "import-stock": "tsx scripts/import-stock.ts"
+    "import-stock": "tsx scripts/import-stock.ts",
+    "import-financials": "tsx scripts/import-financials.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.3",

@@ -1,5 +1,6 @@
 import { getAllGoals } from "@/lib/data/goals";
 import { getSalesInRange } from "@/lib/data/sales";
+import { getBpTargets, getFinancialMonths, getHistoricYears } from "@/lib/data/financials";
 import { deleteGoal } from "@/lib/actions/goals";
 import {
   getGoalPeriodRange,
@@ -8,16 +9,35 @@ import {
   sumProfit,
   countOrders,
   averageOrderValue,
+  buildYearComparisons,
+  fiscalYearOf,
 } from "@/lib/calculations";
 import { toTitleCase, formatDate } from "@/lib/utils";
+import { parseCurrencyParam } from "@/lib/currency";
 import { Card } from "@/components/ui/Card";
 import { LinkButton } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ConfirmSubmitButton } from "@/components/ui/ConfirmSubmitButton";
 import { GoalProgressBar } from "@/components/dashboard/GoalProgressBar";
+import { BpTargets } from "@/components/dashboard/BpTargets";
 
-export default async function GoalsPage() {
-  const goals = await getAllGoals();
+export default async function GoalsPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const currency = parseCurrencyParam(await searchParams);
+  const [goals, bpTargets, financialMonths, historicYears] = await Promise.all([
+    getAllGoals(),
+    getBpTargets(),
+    getFinancialMonths(),
+    getHistoricYears(),
+  ]);
+
+  // The plan runs on fiscal years ending 31 March, so the year being lived
+  // right now is the one today falls into, not the calendar year.
+  const currentFiscalYear = fiscalYearOf(new Date().toISOString().slice(0, 10));
+  const yearComparisons = buildYearComparisons(financialMonths, historicYears, bpTargets);
 
   const rows = await Promise.all(
     goals.map(async (goal) => {
@@ -44,13 +64,17 @@ export default async function GoalsPage() {
         </LinkButton>
       </div>
 
-      {rows.length === 0 ? (
+      {rows.length === 0 && yearComparisons.length === 0 ? (
         <EmptyState
           title="No goals yet"
           description="Set a revenue, profit, orders, or AOV target to track progress here and on the dashboard."
           actionLabel="Add goal"
           actionHref="/goals/new"
         />
+      ) : rows.length === 0 ? (
+        <p className="text-sm text-ink/40">
+          No goals set yet. The business plan targets below come from the spreadsheet.
+        </p>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {rows.map(({ goal, range, progress }) => (
@@ -71,12 +95,15 @@ export default async function GoalsPage() {
               <GoalProgressBar
                 title={`${toTitleCase(goal.metric_type)} · ${toTitleCase(goal.period_type)}`}
                 progress={progress}
+                currency={currency}
               />
               {goal.notes && <p className="mt-3 text-xs text-ink/50">{goal.notes}</p>}
             </Card>
           ))}
         </div>
       )}
+
+      <BpTargets years={yearComparisons} currentFiscalYear={currentFiscalYear} currency={currency} />
     </div>
   );
 }

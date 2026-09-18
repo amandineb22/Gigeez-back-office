@@ -4,6 +4,11 @@ import { theme } from "@/theme/config";
 export const CHART_COLORS = {
   revenue: theme.colors.brand[500],
   profit: theme.colors.accent[500],
+  /** Costs read as the counterweight to revenue, so they take a muted brand step. */
+  costs: theme.colors.brand[200],
+  /** Units sold, plotted on its own axis alongside money. */
+  units: "#7A8FA6",
+  zero: "rgba(42, 36, 32, 0.25)",
   grid: "rgba(42, 36, 32, 0.08)",
   axis: "rgba(42, 36, 32, 0.4)",
   categorical: [

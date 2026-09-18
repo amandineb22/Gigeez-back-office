@@ -15,7 +15,8 @@ export function AppShell({
 
   return (
     <div className="flex min-h-screen bg-paper">
-      <div className="hidden md:block">
+      {/* Pinned to the viewport so the menu stays put as the page scrolls. */}
+      <div className="hidden md:sticky md:top-0 md:block md:h-screen md:shrink-0">
         <Sidebar />
       </div>
 

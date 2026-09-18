@@ -17,6 +17,7 @@ export type ExpenseCategory =
   | "utilities"
   | "salaries"
   | "software"
+  | "travel"
   | "other";
 
 export type CostType = "fixed" | "variable";
@@ -160,6 +161,8 @@ export interface Expense {
   cost_type: CostType;
   vendor: string | null;
   notes: string | null;
+  /** Set on rows imported from the P&L sheet; null for hand-entered ones. */
+  source_ref: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -240,7 +243,67 @@ export const EXPENSE_CATEGORIES: ExpenseCategory[] = [
   "utilities",
   "salaries",
   "software",
+  "travel",
   "other",
 ];
 
 export const PAYMENT_METHODS = ["card", "cash", "bank transfer", "paypal", "other"];
+
+/**
+ * A month of actuals from the Gigeez P&L spreadsheet. Amounts are in QAR, and
+ * the four cost columns are the spreadsheet's own bands. Kept apart from
+ * `Sale` / `Expense`, which record individual pieces and individual expense
+ * lines: the two describe the same business but are never added together.
+ */
+export interface FinancialMonth {
+  id: string;
+  month: string; // ISO date, always the 1st
+  units: number;
+  revenue: number;
+  cost_production: number;
+  cost_commercial: number;
+  cost_marketing: number;
+  cost_admin: number;
+  created_at: string;
+  updated_at: string;
+}
+
+/** A year of business-plan targets from the BP (Target) sheet, stored in QAR. */
+export interface BpTarget {
+  id: string;
+  year: number;
+  units: number;
+  revenue: number;
+  expenses: number;
+  ebitda: number;
+  created_at: string;
+  updated_at: string;
+}
+
+/** The spreadsheet's cost bands, in the order they appear on the dashboard. */
+export const FINANCIAL_COST_BANDS = [
+  { key: "cost_production", label: "Production" },
+  { key: "cost_commercial", label: "Commercial" },
+  { key: "cost_marketing", label: "Marketing" },
+  { key: "cost_admin", label: "Admin" },
+] as const;
+
+export type FinancialCostBand = (typeof FINANCIAL_COST_BANDS)[number]["key"];
+
+/**
+ * A fiscal year from the HIST tab — years ending 31 March, predating the
+ * monthly P&L sheet. No unit counts: the tab never recorded them.
+ */
+export interface HistoricYear {
+  id: string;
+  fiscal_year: number;
+  revenue: number;
+  cogs: number;
+  gross_profit: number;
+  ebitda: number;
+  inventories: number;
+  net_cash: number;
+  net_equity: number;
+  created_at: string;
+  updated_at: string;
+}

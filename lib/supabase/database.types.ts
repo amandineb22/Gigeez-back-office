@@ -183,6 +183,7 @@ export interface Database {
           cost_type: CostType;
           vendor: string | null;
           notes: string | null;
+          source_ref: string | null;
         } & Timestamps;
         Insert: {
           id?: string;
@@ -192,6 +193,7 @@ export interface Database {
           cost_type: CostType;
           vendor?: string | null;
           notes?: string | null;
+          source_ref?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["expenses"]["Insert"]>;
         Relationships: Relationship[];
@@ -269,6 +271,76 @@ export interface Database {
           content?: string;
         };
         Update: Partial<Database["public"]["Tables"]["monthly_notes"]["Insert"]>;
+        Relationships: Relationship[];
+      };
+      financial_months: {
+        Row: {
+          id: string;
+          month: string;
+          units: number;
+          revenue: number;
+          cost_production: number;
+          cost_commercial: number;
+          cost_marketing: number;
+          cost_admin: number;
+        } & Timestamps;
+        Insert: {
+          id?: string;
+          month: string;
+          units?: number;
+          revenue?: number;
+          cost_production?: number;
+          cost_commercial?: number;
+          cost_marketing?: number;
+          cost_admin?: number;
+        };
+        Update: Partial<Database["public"]["Tables"]["financial_months"]["Insert"]>;
+        Relationships: Relationship[];
+      };
+      bp_targets: {
+        Row: {
+          id: string;
+          year: number;
+          units: number;
+          revenue: number;
+          expenses: number;
+          ebitda: number;
+        } & Timestamps;
+        Insert: {
+          id?: string;
+          year: number;
+          units?: number;
+          revenue?: number;
+          expenses?: number;
+          ebitda?: number;
+        };
+        Update: Partial<Database["public"]["Tables"]["bp_targets"]["Insert"]>;
+        Relationships: Relationship[];
+      };
+      historic_years: {
+        Row: {
+          id: string;
+          fiscal_year: number;
+          revenue: number;
+          cogs: number;
+          gross_profit: number;
+          ebitda: number;
+          inventories: number;
+          net_cash: number;
+          net_equity: number;
+        } & Timestamps;
+        Insert: {
+          id?: string;
+          fiscal_year: number;
+          revenue?: number;
+          cogs?: number;
+          gross_profit?: number;
+          ebitda?: number;
+          inventories?: number;
+          net_cash?: number;
+          net_equity?: number;
+        };
+        Update: Partial<Database["public"]["Tables"]["historic_years"]["Insert"]>;
         Relationships: Relationship[];
       };
     };

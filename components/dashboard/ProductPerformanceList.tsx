@@ -1,14 +1,17 @@
 import { formatCurrency } from "@/lib/utils";
 import type { ProductPerformance } from "@/lib/calculations";
+import { BASE_CURRENCY, type Currency } from "@/lib/currency";
 
 export function ProductPerformanceList({
   title,
   items,
   emptyLabel,
+  currency = BASE_CURRENCY,
 }: {
   title: string;
   items: ProductPerformance[];
   emptyLabel: string;
+  currency?: Currency;
 }) {
   return (
     <div>
@@ -23,7 +26,7 @@ export function ProductPerformanceList({
                 <p className="truncate font-medium text-ink">{p.product_name}</p>
                 <p className="text-xs text-ink/40">{p.unitsSold} units sold</p>
               </div>
-              <p className="shrink-0 font-medium text-ink/80">{formatCurrency(p.revenue)}</p>
+              <p className="shrink-0 font-medium text-ink/80">{formatCurrency(p.revenue, currency)}</p>
             </li>
           ))}
         </ul>

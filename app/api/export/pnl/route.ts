@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { getSalesInRange } from "@/lib/data/sales";
 import { getExpensesInRange } from "@/lib/data/expenses";
+import { getFinancialMonthsInRange } from "@/lib/data/financials";
 import { buildProfitAndLoss, type PnLGrouping, type PnLRow } from "@/lib/calculations";
 import { parseDateRangeParams } from "@/lib/utils";
 import { toCsv, csvResponse } from "@/lib/csv";
@@ -12,8 +13,14 @@ export async function GET(request: NextRequest) {
     ? params.get("grouping")
     : "month") as PnLGrouping;
 
-  const [sales, expenses] = await Promise.all([getSalesInRange(range), getExpensesInRange(range)]);
-  const rows = buildProfitAndLoss(sales, expenses, grouping);
+  // Same three inputs as the Reports page, so the export always matches what
+  // was on screen when it was downloaded.
+  const [sales, expenses, financialMonths] = await Promise.all([
+    getSalesInRange(range),
+    getExpensesInRange(range),
+    getFinancialMonthsInRange(range),
+  ]);
+  const rows = buildProfitAndLoss(sales, expenses, grouping, financialMonths);
 
   const csv = toCsv<PnLRow>(rows, [
     { header: "Period", accessor: (r) => r.periodLabel },

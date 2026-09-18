@@ -89,6 +89,49 @@ for `"price_estimated": true`) didn't have an exact price-tab match for
 their length, so their price was estimated from that model's other lengths —
 worth double-checking those SKUs in the Products page after import.
 
+## 5d. Import the profit and loss spreadsheet
+
+`data/imports/2026-financials.json` is a cleaned-up snapshot of the Gigeez
+profit-and-loss workbook. It carries two things:
+
+- **Monthly actuals** from the `P&L` sheet (Apr 2025 onward): units sold,
+  revenue, and the sheet's own four cost bands — production, commercial,
+  marketing and admin. These land in `financial_months`.
+- **Yearly business-plan targets** from the `BP (Target)` sheet. Those are
+  stated in euros in the workbook and converted to QAR on the way in, at the
+  4.1245 rate the workbook itself uses. These land in `bp_targets`.
+- **Earlier fiscal years** from the `HIST` tab (FY23–FY25), which predate the
+  monthly sheet. These land in `historic_years` and carry no unit counts,
+  because the tab never recorded any.
+- **Individual expense lines** from the sheet's four cost bands, which become
+  real rows in `expenses` alongside anything entered by hand. Each carries a
+  `source_ref` like `pnl:2026-01-01:tailor-cost`, so a re-import updates the
+  same row instead of adding a second copy, hand-entered rows (`source_ref`
+  null) are never touched, and the Expenses page marks the imported ones.
+  Editing an imported row by hand works, but a later re-import will overwrite
+  it. One line is skipped: an advance payment from a customer, which is
+  negative and so money in rather than money out.
+
+```bash
+npm run import-financials
+```
+
+If the project already exists and you only need the two new tables, paste
+[`supabase/add-financials-tables.sql`](supabase/add-financials-tables.sql)
+into the SQL Editor instead of re-running the whole schema — it's the same
+statements on their own, and safe to run more than once.
+
+Both tables are keyed on their period, and the script upserts, so re-running
+it after the workbook is updated refreshes the figures in place rather than
+duplicating them. Regenerate the JSON snapshot from a newer workbook and run
+it again.
+
+This import deliberately does **not** touch `sales`, `expenses` or
+`stock_units`. The spreadsheet and the piece-level tables describe the same
+business but record it differently — the sheet is a monthly accounting view,
+the tables are individual pieces and individual expense lines — so the
+dashboard shows them as separate sections and never adds them together.
+
 ## 5c. Removing the sample data
 
 If you ran `npm run seed` earlier and now want the placeholder products,
@@ -163,13 +206,40 @@ supabase/schema.sql       Full schema, views, RLS policies
 supabase/cleanup-demo-data.sql  Deletes the sample data from npm run seed
 scripts/seed.ts           Sample data generator
 scripts/import-stock.ts   One-time importer for the real Gigeez stock data
-data/imports/             Cleaned JSON snapshots consumed by import-stock.ts
+scripts/import-financials.ts  Upserting importer for the P&L spreadsheet
+data/imports/             Cleaned JSON snapshots consumed by the importers
 ```
 
 ## Notes on the data model
 
-- Money amounts are stored as `numeric(10,2)` and always rendered as QAR
-  (`QAR 1,234.56`) via `formatCurrency()` in `lib/utils.ts`.
+- Money amounts are **stored** in QAR as `numeric(10,2)`. QAR is the base
+  currency: product costs, sale prices, expenses and the imported financials
+  all come from sheets denominated in riyal.
+- The top bar has a **display-currency picker** (QAR / EUR / USD). It writes
+  `?currency=` on the URL, next to the date range, and every page converts on
+  render — server components via `parseCurrencyParam()`, client components via
+  the `useCurrency()` hook. It is presentation only: switching currency never
+  converts or rewrites a stored figure, and the CSV exports stay in QAR.
+  The add-expense form also lets an amount be typed in EUR or USD — handy for
+  an invoice that arrives that way — and converts it to QAR server-side before
+  storing, so nothing but QAR ever reaches the database.
+  Rates live in one place, `QAR_PER_UNIT` in `lib/currency.ts` — fixed rates
+  rather than a live feed (the riyal is pegged to the dollar at 3.64, and
+  4.1245 is the euro rate the Gigeez P&L workbook uses), so converted figures
+  tie back to the spreadsheet exactly. Edit them there when the planning rate
+  changes.
+- **Fiscal years end 31 March**, so April 2025 to March 2026 is FY2026. That's
+  the basis the `HIST` tab uses and the basis the business plan is built on —
+  the plan's first year matches that year's actual revenue almost exactly,
+  which is what ties the two together. Anything comparing actuals against plan
+  goes through `buildYearComparisons()` in `lib/calculations.ts` and is
+  labelled on screen with its months, so the basis is never left to be guessed.
+  The dashboard's monthly financials section stays on calendar years, since it
+  is labelled month by month and carries no plan comparison.
+- `financial_months` / `bp_targets` / `historic_years` hold the spreadsheet figures and are kept
+  separate from `sales` / `expenses` on purpose — see section 5d. The cost
+  columns are cash paid in the month, not the cost of the pieces sold in it,
+  which is why the dashboard calls that line "cash net" rather than profit.
 - Revenue, COGS, and profit are **not** stored on the `sales` table directly —
   they're computed by the `v_sales` Postgres view (joining sales → variants →
   products) so they can never drift out of sync with the underlying data.
