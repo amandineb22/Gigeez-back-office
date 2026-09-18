@@ -2,6 +2,7 @@ import { format, parseISO } from "date-fns";
 import { Card, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Table, Thead, Th, Tr, Td } from "@/components/ui/Table";
 import { FinancialsChart } from "@/components/charts/FinancialsChart";
+import { MetricTile, type TileExplanation } from "@/components/dashboard/MetricTile";
 import { cn, formatCurrency, formatPercent } from "@/lib/utils";
 import { BASE_CURRENCY, type Currency } from "@/lib/currency";
 import {
@@ -19,56 +20,6 @@ function describeSpan(totals: FinancialYearTotals): string {
   const from = format(parseISO(totals.firstMonth), "MMM");
   const to = format(parseISO(totals.lastMonth), "MMM");
   return from === to ? `${from} ${totals.year}` : `${from}–${to} ${totals.year}`;
-}
-
-function ComparisonPill({ changePct, label }: { changePct: number | null; label: string }) {
-  if (changePct === null) {
-    return <span className="text-xs text-ink/30">no {label} to compare</span>;
-  }
-  const up = changePct > 0;
-  const flat = Math.abs(changePct) < 0.5;
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1 text-xs font-medium",
-        flat ? "text-ink/40" : up ? "text-emerald-600" : "text-red-500"
-      )}
-    >
-      {!flat && (up ? "▲" : "▼")}
-      {formatPercent(Math.abs(changePct))} <span className="text-ink/35">vs {label}</span>
-    </span>
-  );
-}
-
-function Tile({
-  label,
-  value,
-  changePct,
-  comparisonLabel,
-  tone = "neutral",
-}: {
-  label: string;
-  value: string;
-  changePct: number | null;
-  comparisonLabel: string;
-  tone?: "neutral" | "signed";
-}) {
-  return (
-    <div>
-      <p className="text-xs font-medium uppercase tracking-wide text-ink/40">{label}</p>
-      <p
-        className={cn(
-          "mt-2 font-display text-2xl",
-          tone === "signed" && value.trim().startsWith("-") ? "text-red-600" : "text-ink"
-        )}
-      >
-        {value}
-      </p>
-      <div className="mt-2">
-        <ComparisonPill changePct={changePct} label={comparisonLabel} />
-      </div>
-    </div>
-  );
 }
 
 /**
@@ -101,6 +52,48 @@ export function FinancialsSection({
 
   const targetPct = target ? targetProgress(totals.revenue, target.revenue) : null;
 
+  const span = describeSpan(totals);
+  const money = (n: number) => formatCurrency(n, currency);
+  // Called out by name in the units explanation: one big month skews the chart,
+  // and saying which one up front is friendlier than leaving it to be noticed.
+  const busiest = rows.reduce<(typeof rows)[number] | null>(
+    (best, r) => (best === null || r.units > best.units ? r : best),
+    null
+  );
+
+  const explanations: Record<"revenue" | "units" | "costs" | "cashNet", TileExplanation> = {
+    revenue: {
+      summary: `What you brought in from dress sales over ${span}, before any costs are taken off.`,
+      caveat:
+        "Added up from the revenue line of every style in your profit and loss sheet, one month at a time. The table below breaks it down month by month.",
+    },
+    units: {
+      summary: `The number of dresses sold over ${span}.`,
+      caveat: busiest
+        ? `Counted from the units line of every style in your sheet. The busiest month was ${format(
+            parseISO(busiest.month),
+            "MMMM"
+          )} with ${busiest.units.toLocaleString()}, which is why one bar in the chart stands so far above the rest.`
+        : "Counted from the units line of every style in your sheet.",
+    },
+    costs: {
+      summary: `Everything you paid out over ${span}, across the four cost groups in your sheet.`,
+      rows: [
+        { label: "Production", value: money(totals.costProduction) },
+        { label: "Commercial", value: money(totals.costCommercial) },
+        { label: "Marketing", value: money(totals.costMarketing) },
+        { label: "Admin", value: money(totals.costAdmin) },
+      ],
+      formula: `Added together: ${money(totals.totalCosts)}`,
+    },
+    cashNet: {
+      summary: "What is left once costs come off what you brought in.",
+      formula: `${money(totals.revenue)} − ${money(totals.totalCosts)} = ${money(totals.cashNet)}`,
+      caveat:
+        "This is not profit. The costs are what you actually paid in each month, not the cost of the dresses you sold that month, so paying for a production run or an exhibition up front can push a month below zero even when the dresses sold well.",
+    },
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -113,29 +106,33 @@ export function FinancialsSection({
       </p>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <Tile
+        <MetricTile
           label="Revenue"
           value={formatCurrency(totals.revenue, currency)}
           changePct={change(totals.revenue, "revenue")}
           comparisonLabel={comparisonLabel}
+          explanation={explanations.revenue}
         />
-        <Tile
+        <MetricTile
           label="Units sold"
           value={totals.units.toLocaleString()}
           changePct={change(totals.units, "units")}
           comparisonLabel={comparisonLabel}
+          explanation={explanations.units}
         />
-        <Tile
+        <MetricTile
           label="Costs"
           value={formatCurrency(totals.totalCosts, currency)}
           changePct={change(totals.totalCosts, "totalCosts")}
           comparisonLabel={comparisonLabel}
+          explanation={explanations.costs}
         />
-        <Tile
+        <MetricTile
           label="Cash net"
           value={formatCurrency(totals.cashNet, currency)}
           changePct={change(totals.cashNet, "cashNet")}
           comparisonLabel={comparisonLabel}
+          explanation={explanations.cashNet}
           tone="signed"
         />
       </div>

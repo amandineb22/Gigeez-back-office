@@ -17,20 +17,20 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
 
   return (
     <div className="flex h-full w-64 flex-col border-r border-ink/5 bg-white">
-      <div className="px-6 py-7">
+      <div className="px-6 pb-5 pt-6">
         <Link href="/" className="block" onClick={onNavigate}>
           <Image
             src={theme.logo.mark}
             alt={theme.logo.text}
             width={theme.logo.width}
             height={theme.logo.height}
-            className="h-20 w-20 object-contain"
+            className="h-32 w-32 object-contain"
             priority
           />
         </Link>
       </div>
 
-      <nav className="flex-1 space-y-0.5 px-3">
+      <nav className="scrollbar-thin flex-1 space-y-0.5 overflow-y-auto px-3">
         {NAV_ITEMS.map((item) => {
           const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
           return (
