@@ -27,20 +27,28 @@ function ProgressBar({ pct, className }: { pct: number; className?: string }) {
   );
 }
 
-/** The year still being lived: big numbers, a bar, and how much is left to go. */
-function CurrentYearPanel({ year, currency }: { year: YearComparison; currency: Currency }) {
+/** A headline year: big percentage, a bar, and how much was left to go. */
+function YearPanel({
+  year,
+  caption,
+  currency,
+}: {
+  year: YearComparison;
+  caption: string;
+  currency: Currency;
+}) {
   const pct = year.percentOfTarget ?? 0;
   const remaining = (year.target ?? 0) - year.revenue;
-  const monthsElapsed = year.monthsWithData;
 
   return (
     <div className="rounded-xl bg-paper px-5 py-5">
-      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+      <p className="text-xs font-medium uppercase tracking-wide text-ink/40">{caption}</p>
+      <div className="mt-1.5 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
         <p className="text-sm font-medium text-ink">
           {year.label} <span className="font-normal text-ink/40">· {year.rangeLabel}</span>
         </p>
         <p className="text-xs text-ink/40">
-          {year.complete ? "Complete" : `In progress, ${monthsElapsed} of 12 months so far`}
+          {year.complete ? "Complete" : `${year.monthsWithData} of 12 months so far`}
         </p>
       </div>
 
@@ -53,7 +61,9 @@ function CurrentYearPanel({ year, currency }: { year: YearComparison; currency: 
 
       {remaining > 0 && (
         <p className="mt-2.5 text-xs text-ink/50">
-          {formatCurrency(remaining, currency)} still to go to reach the plan.
+          {year.complete
+            ? `${formatCurrency(remaining, currency)} short of the plan.`
+            : `${formatCurrency(remaining, currency)} still to go to reach the plan.`}
         </p>
       )}
     </div>
@@ -80,8 +90,14 @@ export function BpTargets({
   if (years.length === 0) return null;
 
   const withTarget = years.filter((y) => y.target !== null);
+  // Two headline years: the one being lived now, where the bar tracks progress,
+  // and the last finished one, where it shows how the year actually landed.
   const current = withTarget.find((y) => y.fiscalYear === currentFiscalYear) ?? null;
-  const past = withTarget.filter((y) => y.fiscalYear !== currentFiscalYear);
+  const lastComplete = [...withTarget]
+    .reverse()
+    .find((y) => y.complete && y.fiscalYear !== currentFiscalYear) ?? null;
+  const headline = [current?.fiscalYear, lastComplete?.fiscalYear].filter((n) => n !== undefined);
+  const past = withTarget.filter((y) => !headline.includes(y.fiscalYear));
 
   const chartData = withTarget.map((y) => ({
     label: y.label,
@@ -100,9 +116,12 @@ export function BpTargets({
         spreadsheet, FY26 onwards from the monthly profit and loss sheet.
       </p>
 
-      {current && (
-        <div className="mb-6">
-          <CurrentYearPanel year={current} currency={currency} />
+      {(current || lastComplete) && (
+        <div className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+          {current && <YearPanel year={current} caption="Year in progress" currency={currency} />}
+          {lastComplete && (
+            <YearPanel year={lastComplete} caption="Last full year" currency={currency} />
+          )}
         </div>
       )}
 
