@@ -103,6 +103,14 @@ profit-and-loss workbook. It carries two things:
 - **Earlier fiscal years** from the `HIST` tab (FY23–FY25), which predate the
   monthly sheet. These land in `historic_years` and carry no unit counts,
   because the tab never recorded any.
+- **Individual expense lines** from the sheet's four cost bands, which become
+  real rows in `expenses` alongside anything entered by hand. Each carries a
+  `source_ref` like `pnl:2026-01-01:tailor-cost`, so a re-import updates the
+  same row instead of adding a second copy, hand-entered rows (`source_ref`
+  null) are never touched, and the Expenses page marks the imported ones.
+  Editing an imported row by hand works, but a later re-import will overwrite
+  it. One line is skipped: an advance payment from a customer, which is
+  negative and so money in rather than money out.
 
 ```bash
 npm run import-financials

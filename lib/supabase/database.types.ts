@@ -183,6 +183,7 @@ export interface Database {
           cost_type: CostType;
           vendor: string | null;
           notes: string | null;
+          source_ref: string | null;
         } & Timestamps;
         Insert: {
           id?: string;
@@ -192,6 +193,7 @@ export interface Database {
           cost_type: CostType;
           vendor?: string | null;
           notes?: string | null;
+          source_ref?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["expenses"]["Insert"]>;
         Relationships: Relationship[];

@@ -181,9 +181,23 @@ create table if not exists expenses (
   cost_type text not null check (cost_type in ('fixed', 'variable')),
   vendor text,
   notes text,
+  -- Set only on rows imported from the profit and loss spreadsheet, e.g.
+  -- "pnl:2026-01-01:tailor-cost". Unique so a re-import updates the same row
+  -- rather than adding a second copy; null for anything entered by hand, and
+  -- Postgres allows any number of nulls in a unique index.
+  source_ref text unique,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+-- Backfill for databases created before source_ref existed.
+alter table expenses add column if not exists source_ref text;
+do $$
+begin
+  if not exists (select 1 from pg_constraint where conname = 'expenses_source_ref_key') then
+    alter table expenses add constraint expenses_source_ref_key unique (source_ref);
+  end if;
+end $$;
 
 -- Backfill for databases created before "travel" was a category: on an
 -- existing table the "create table if not exists" above is a no-op, so the

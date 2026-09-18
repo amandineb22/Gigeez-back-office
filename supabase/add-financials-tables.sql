@@ -100,6 +100,19 @@ begin
 end $$;
 
 -- ----------------------------------------------------------------------------
+-- Mark which expenses came from the spreadsheet, so a re-import updates the
+-- same rows instead of adding a second copy of everything. Null for expenses
+-- entered by hand, and Postgres allows any number of nulls in a unique index.
+-- ----------------------------------------------------------------------------
+alter table expenses add column if not exists source_ref text;
+do $$
+begin
+  if not exists (select 1 from pg_constraint where conname = 'expenses_source_ref_key') then
+    alter table expenses add constraint expenses_source_ref_key unique (source_ref);
+  end if;
+end $$;
+
+-- ----------------------------------------------------------------------------
 -- Keep updated_at current, the same way every other table does.
 -- ----------------------------------------------------------------------------
 do $$

@@ -42,3 +42,19 @@ export async function getAllSales(): Promise<SaleWithDetails[]> {
   if (error) throw new Error(`Failed to load sales: ${error.message}`);
   return data ?? [];
 }
+
+/**
+ * How many sales carry no date. These came from the stock spreadsheet, which
+ * recorded that a piece had sold but not when, so they fall out of every
+ * date-range figure — see components/dashboard/UndatedSalesNotice.tsx.
+ */
+export async function countUndatedSales(): Promise<number> {
+  const supabase = await createClient();
+  const { count, error } = await supabase
+    .from("sales")
+    .select("*", { count: "exact", head: true })
+    .is("sale_date", null);
+
+  if (error) throw new Error(`Failed to count undated sales: ${error.message}`);
+  return count ?? 0;
+}

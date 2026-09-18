@@ -161,6 +161,8 @@ export interface Expense {
   cost_type: CostType;
   vendor: string | null;
   notes: string | null;
+  /** Set on rows imported from the P&L sheet; null for hand-entered ones. */
+  source_ref: string | null;
   created_at: string;
   updated_at: string;
 }

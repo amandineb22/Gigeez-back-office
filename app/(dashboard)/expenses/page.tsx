@@ -36,7 +36,7 @@ export default async function ExpensesPage({
       {expenses.length === 0 ? (
         <EmptyState
           title="No expenses in this range"
-          description="Log an expense to keep your P&L and cash flow accurate."
+          description="Log an expense, or import the profit and loss sheet, to keep your P&L and cash flow accurate."
           actionLabel="Add expense"
           actionHref="/expenses/new"
         />
@@ -61,7 +61,14 @@ export default async function ExpensesPage({
                   <Td>
                     <Badge variant={e.cost_type === "fixed" ? "brand" : "neutral"}>{toTitleCase(e.cost_type)}</Badge>
                   </Td>
-                  <Td>{e.vendor ?? "—"}</Td>
+                  <Td>
+                    {e.vendor ?? "—"}
+                    {e.source_ref && (
+                      <span className="ml-2 align-middle">
+                        <Badge variant="neutral">From P&amp;L sheet</Badge>
+                      </span>
+                    )}
+                  </Td>
                   <Td className="font-medium text-ink">{formatCurrency(e.amount, currency)}</Td>
                   <Td>
                     <div className="flex items-center justify-end gap-1">

@@ -64,12 +64,24 @@ interface ImportHistoricYear {
   net_equity: number;
 }
 
+interface ImportExpense {
+  source_ref: string;
+  expense_date: string;
+  category: string;
+  amount: number;
+  cost_type: string;
+  vendor: string | null;
+  notes: string;
+}
+
 interface ImportFile {
   source_file: string;
   base_currency: string;
   monthly: ImportMonth[];
   bp_targets: ImportTarget[];
   historic_years?: ImportHistoricYear[];
+  expenses?: ImportExpense[];
+  expenses_skipped?: { month: string; label: string; amount: number }[];
 }
 
 const fileArg = process.argv.slice(2).find((a) => !a.startsWith("--"));
@@ -88,7 +100,8 @@ async function main() {
 
   console.log(
     `Loaded ${raw.monthly.length} months, ${raw.bp_targets.length} target years and ` +
-      `${raw.historic_years?.length ?? 0} historic years from ${DATA_FILE} (source: ${raw.source_file})`
+      `${raw.historic_years?.length ?? 0} historic years and ${raw.expenses?.length ?? 0} expense lines ` +
+      `from ${DATA_FILE} (source: ${raw.source_file})`
   );
 
   const months = raw.monthly.map((m) => ({
@@ -130,7 +143,36 @@ async function main() {
     console.log(`${historic.length} historic years upserted into historic_years.`);
   }
 
-  console.log("Done. Sales, expenses and stock were not touched.");
+  // Individual expense lines from the sheet's four cost bands. Keyed by
+  // source_ref so a re-import updates the same rows rather than adding a
+  // second copy; anything entered by hand has a null source_ref and is never
+  // touched here.
+  const expenses = raw.expenses ?? [];
+  if (expenses.length) {
+    const rows: Database["public"]["Tables"]["expenses"]["Insert"][] = expenses.map((e) => ({
+      source_ref: e.source_ref,
+      expense_date: e.expense_date,
+      category: e.category as Database["public"]["Tables"]["expenses"]["Insert"]["category"],
+      amount: e.amount,
+      cost_type: e.cost_type as Database["public"]["Tables"]["expenses"]["Insert"]["cost_type"],
+      vendor: e.vendor,
+      notes: e.notes,
+    }));
+    const { error: expensesError } = await supabase
+      .from("expenses")
+      .upsert(rows, { onConflict: "source_ref" });
+    if (expensesError) throw expensesError;
+    console.log(`${rows.length} expense lines upserted into expenses (hand-entered rows untouched).`);
+  }
+
+  for (const s of raw.expenses_skipped ?? []) {
+    console.log(
+      `Skipped ${s.month} "${s.label}" (${s.amount}): the expenses table only accepts ` +
+        "amounts of zero or more, and this is money in rather than money out."
+    );
+  }
+
+  console.log("Done. Sales and stock were not touched.");
 }
 
 main().catch((err) => {

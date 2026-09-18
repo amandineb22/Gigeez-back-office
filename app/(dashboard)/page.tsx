@@ -1,4 +1,4 @@
-import { getSalesInRange, getAllSales } from "@/lib/data/sales";
+import { getSalesInRange, getAllSales, countUndatedSales } from "@/lib/data/sales";
 import { getExpensesInRange } from "@/lib/data/expenses";
 import { getInventory } from "@/lib/data/inventory";
 import { getReceivedPOsInRange } from "@/lib/data/purchaseOrders";
@@ -40,6 +40,7 @@ import { ProductPerformanceList } from "@/components/dashboard/ProductPerformanc
 import { GoalProgressBar } from "@/components/dashboard/GoalProgressBar";
 import { FinancialsSection } from "@/components/dashboard/FinancialsSection";
 import { YearComparisonChart } from "@/components/charts/YearComparisonChart";
+import { UndatedSalesNotice } from "@/components/dashboard/UndatedSalesNotice";
 import { RevenueLineChart } from "@/components/charts/RevenueLineChart";
 import { ExpensePieChart } from "@/components/charts/ExpensePieChart";
 import { ProfitTrendChart } from "@/components/charts/ProfitTrendChart";
@@ -71,6 +72,7 @@ export default async function DashboardHomePage({
     financialMonths,
     bpTargets,
     historicYears,
+    undatedSalesCount,
   ] = await Promise.all([
     getSalesInRange(range),
     getSalesInRange(previousRange),
@@ -83,6 +85,7 @@ export default async function DashboardHomePage({
     getFinancialMonths(),
     getBpTargets(),
     getHistoricYears(),
+    countUndatedSales(),
   ]);
 
   // The spreadsheet financials stand on their own, keyed to the most recent
@@ -236,6 +239,8 @@ export default async function DashboardHomePage({
           />
         </Card>
       )}
+
+      <UndatedSalesNotice undatedSalesCount={undatedSalesCount} />
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
         <Card>

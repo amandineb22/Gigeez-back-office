@@ -1,5 +1,5 @@
 import { differenceInCalendarDays, parseISO } from "date-fns";
-import { getSalesInRange } from "@/lib/data/sales";
+import { getSalesInRange, countUndatedSales } from "@/lib/data/sales";
 import { getExpensesInRange } from "@/lib/data/expenses";
 import {
   buildProfitAndLoss,
@@ -16,6 +16,7 @@ import { LinkButton } from "@/components/ui/Button";
 import { Table, Thead, Th, Tr, Td } from "@/components/ui/Table";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ReportControls } from "./ReportControls";
+import { UndatedSalesNotice } from "@/components/dashboard/UndatedSalesNotice";
 
 export default async function ReportsPage({
   searchParams,
@@ -28,7 +29,11 @@ export default async function ReportsPage({
   const grouping = (["month", "quarter", "year"].includes(String(sp.grouping)) ? sp.grouping : "month") as PnLGrouping;
   const cashOnHand = Number(sp.cash ?? 0) || 0;
 
-  const [sales, expenses] = await Promise.all([getSalesInRange(range), getExpensesInRange(range)]);
+  const [sales, expenses, undatedSalesCount] = await Promise.all([
+    getSalesInRange(range),
+    getExpensesInRange(range),
+    countUndatedSales(),
+  ]);
 
   const pnlRows = buildProfitAndLoss(sales, expenses, grouping);
   const cashFlowRows = buildCashFlow(sales, expenses, grouping, cashOnHand);
@@ -52,6 +57,8 @@ export default async function ReportsPage({
           Export P&amp;L CSV
         </LinkButton>
       </div>
+
+      <UndatedSalesNotice undatedSalesCount={undatedSalesCount} />
 
       <Card>
         <ReportControls grouping={grouping} cashOnHand={cashOnHand} />
