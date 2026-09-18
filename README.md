@@ -105,6 +105,11 @@ profit-and-loss workbook. It carries two things:
 npm run import-financials
 ```
 
+If the project already exists and you only need the two new tables, paste
+[`supabase/add-financials-tables.sql`](supabase/add-financials-tables.sql)
+into the SQL Editor instead of re-running the whole schema — it's the same
+statements on their own, and safe to run more than once.
+
 Both tables are keyed on their period, and the script upserts, so re-running
 it after the workbook is updated refreshes the figures in place rather than
 duplicating them. Regenerate the JSON snapshot from a newer workbook and run
