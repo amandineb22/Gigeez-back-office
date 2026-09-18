@@ -1,5 +1,6 @@
 import { getAllGoals } from "@/lib/data/goals";
 import { getSalesInRange } from "@/lib/data/sales";
+import { getBpTargets, getFinancialMonths } from "@/lib/data/financials";
 import { deleteGoal } from "@/lib/actions/goals";
 import {
   getGoalPeriodRange,
@@ -8,16 +9,34 @@ import {
   sumProfit,
   countOrders,
   averageOrderValue,
+  totalFinancialYear,
 } from "@/lib/calculations";
 import { toTitleCase, formatDate } from "@/lib/utils";
+import { parseCurrencyParam } from "@/lib/currency";
 import { Card } from "@/components/ui/Card";
 import { LinkButton } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ConfirmSubmitButton } from "@/components/ui/ConfirmSubmitButton";
 import { GoalProgressBar } from "@/components/dashboard/GoalProgressBar";
+import { BpTargets, type BpTargetRow } from "@/components/dashboard/BpTargets";
 
-export default async function GoalsPage() {
-  const goals = await getAllGoals();
+export default async function GoalsPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const currency = parseCurrencyParam(await searchParams);
+  const [goals, bpTargets, financialMonths] = await Promise.all([
+    getAllGoals(),
+    getBpTargets(),
+    getFinancialMonths(),
+  ]);
+
+  const financialYears = new Set(financialMonths.map((m) => Number(m.month.slice(0, 4))));
+  const targetRows: BpTargetRow[] = bpTargets.map((target) => ({
+    target,
+    actuals: financialYears.has(target.year) ? totalFinancialYear(target.year, financialMonths) : null,
+  }));
 
   const rows = await Promise.all(
     goals.map(async (goal) => {
@@ -44,13 +63,17 @@ export default async function GoalsPage() {
         </LinkButton>
       </div>
 
-      {rows.length === 0 ? (
+      {rows.length === 0 && targetRows.length === 0 ? (
         <EmptyState
           title="No goals yet"
           description="Set a revenue, profit, orders, or AOV target to track progress here and on the dashboard."
           actionLabel="Add goal"
           actionHref="/goals/new"
         />
+      ) : rows.length === 0 ? (
+        <p className="text-sm text-ink/40">
+          No goals set yet. The business plan targets below come from the spreadsheet.
+        </p>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {rows.map(({ goal, range, progress }) => (
@@ -71,12 +94,15 @@ export default async function GoalsPage() {
               <GoalProgressBar
                 title={`${toTitleCase(goal.metric_type)} · ${toTitleCase(goal.period_type)}`}
                 progress={progress}
+                currency={currency}
               />
               {goal.notes && <p className="mt-3 text-xs text-ink/50">{goal.notes}</p>}
             </Card>
           ))}
         </div>
       )}
+
+      <BpTargets rows={targetRows} currency={currency} />
     </div>
   );
 }

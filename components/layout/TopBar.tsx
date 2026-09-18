@@ -3,6 +3,7 @@
 import { Suspense } from "react";
 import { signOut } from "@/lib/actions/auth";
 import { DateRangeFilter } from "./DateRangeFilter";
+import { CurrencyFilter } from "./CurrencyFilter";
 
 function MenuIcon() {
   return (
@@ -25,6 +26,9 @@ export function TopBar({ userEmail, onMenuClick }: { userEmail: string; onMenuCl
         </button>
         <Suspense fallback={<div className="h-7" />}>
           <DateRangeFilter />
+        </Suspense>
+        <Suspense fallback={<div className="h-7" />}>
+          <CurrencyFilter />
         </Suspense>
       </div>
       <div className="flex items-center gap-3">

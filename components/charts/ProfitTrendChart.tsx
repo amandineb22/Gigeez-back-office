@@ -10,6 +10,7 @@ import {
   YAxis,
 } from "recharts";
 import { formatCurrency, formatCurrencyCompact } from "@/lib/utils";
+import { useCurrency } from "@/lib/useCurrency";
 import { CHART_COLORS, tooltipStyle } from "./chart-theme";
 
 export interface ProfitTrendPoint {
@@ -18,6 +19,8 @@ export interface ProfitTrendPoint {
 }
 
 export function ProfitTrendChart({ data }: { data: ProfitTrendPoint[] }) {
+  const currency = useCurrency();
+
   return (
     <ResponsiveContainer width="100%" height={260}>
       <AreaChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
@@ -36,12 +39,12 @@ export function ProfitTrendChart({ data }: { data: ProfitTrendPoint[] }) {
         />
         <YAxis
           tick={{ fontSize: 12, fill: CHART_COLORS.axis }}
-          tickFormatter={(v) => formatCurrencyCompact(v)}
+          tickFormatter={(v) => formatCurrencyCompact(v, currency)}
           axisLine={false}
           tickLine={false}
           width={56}
         />
-        <Tooltip {...tooltipStyle} formatter={(value: number) => [formatCurrency(value), "Net profit"]} />
+        <Tooltip {...tooltipStyle} formatter={(value: number) => [formatCurrency(value, currency), "Net profit"]} />
         <Area type="monotone" dataKey="netProfit" stroke={CHART_COLORS.profit} strokeWidth={2.5} fill="url(#profitFill)" />
       </AreaChart>
     </ResponsiveContainer>

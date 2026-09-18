@@ -271,6 +271,50 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["monthly_notes"]["Insert"]>;
         Relationships: Relationship[];
       };
+      financial_months: {
+        Row: {
+          id: string;
+          month: string;
+          units: number;
+          revenue: number;
+          cost_production: number;
+          cost_commercial: number;
+          cost_marketing: number;
+          cost_admin: number;
+        } & Timestamps;
+        Insert: {
+          id?: string;
+          month: string;
+          units?: number;
+          revenue?: number;
+          cost_production?: number;
+          cost_commercial?: number;
+          cost_marketing?: number;
+          cost_admin?: number;
+        };
+        Update: Partial<Database["public"]["Tables"]["financial_months"]["Insert"]>;
+        Relationships: Relationship[];
+      };
+      bp_targets: {
+        Row: {
+          id: string;
+          year: number;
+          units: number;
+          revenue: number;
+          expenses: number;
+          ebitda: number;
+        } & Timestamps;
+        Insert: {
+          id?: string;
+          year: number;
+          units?: number;
+          revenue?: number;
+          expenses?: number;
+          ebitda?: number;
+        };
+        Update: Partial<Database["public"]["Tables"]["bp_targets"]["Insert"]>;
+        Relationships: Relationship[];
+      };
     };
     Views: {
       v_sales: {

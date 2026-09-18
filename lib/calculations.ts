@@ -25,6 +25,7 @@ import {
 } from "date-fns";
 import type {
   Expense,
+  FinancialMonth,
   Goal,
   InventoryRow,
   SaleWithDetails,
@@ -659,4 +660,117 @@ export function calculateGoalProgress(
   else if (paceRatio >= 0.7) status = "at-risk";
 
   return { actual, target: goal.target_amount, percentOfTarget, percentOfPeriodElapsed, status, periodEnd: range.to };
+}
+
+// ============================================================================
+// Spreadsheet financials
+//
+// These work on the monthly rows imported from the Gigeez P&L sheet, not on
+// the `sales` / `expenses` tables. The two record the same business in
+// different ways, so figures from one are never mixed into the other.
+// ============================================================================
+
+export interface FinancialMonthSummary {
+  month: string;
+  /** Short label for charts, e.g. "Jan". */
+  periodLabel: string;
+  units: number;
+  revenue: number;
+  costProduction: number;
+  costCommercial: number;
+  costMarketing: number;
+  costAdmin: number;
+  totalCosts: number;
+  /**
+   * Revenue less the cash paid out that month. This is not accounting profit:
+   * the spreadsheet's costs are what was spent in the month, not the cost of
+   * the pieces sold in it, so a month can look deeply negative simply because
+   * a production run or an exhibition was paid for up front.
+   */
+  cashNet: number;
+}
+
+export interface FinancialYearTotals {
+  year: number;
+  units: number;
+  revenue: number;
+  costProduction: number;
+  costCommercial: number;
+  costMarketing: number;
+  costAdmin: number;
+  totalCosts: number;
+  cashNet: number;
+  /** Months that actually carry data, used to label partial years honestly. */
+  monthsWithData: number;
+  firstMonth: string | null;
+  lastMonth: string | null;
+}
+
+export function summarizeFinancialMonth(row: FinancialMonth): FinancialMonthSummary {
+  const totalCosts =
+    row.cost_production + row.cost_commercial + row.cost_marketing + row.cost_admin;
+  return {
+    month: row.month,
+    periodLabel: format(parseISO(row.month), "MMM"),
+    units: row.units,
+    revenue: row.revenue,
+    costProduction: row.cost_production,
+    costCommercial: row.cost_commercial,
+    costMarketing: row.cost_marketing,
+    costAdmin: row.cost_admin,
+    totalCosts,
+    cashNet: row.revenue - totalCosts,
+  };
+}
+
+export function summarizeFinancialMonths(rows: FinancialMonth[]): FinancialMonthSummary[] {
+  return rows.map(summarizeFinancialMonth);
+}
+
+export function totalFinancialYear(year: number, rows: FinancialMonth[]): FinancialYearTotals {
+  const months = rows.filter((r) => r.month.startsWith(`${year}-`));
+  const totals = months.reduce(
+    (acc, r) => {
+      acc.units += r.units;
+      acc.revenue += r.revenue;
+      acc.costProduction += r.cost_production;
+      acc.costCommercial += r.cost_commercial;
+      acc.costMarketing += r.cost_marketing;
+      acc.costAdmin += r.cost_admin;
+      return acc;
+    },
+    {
+      units: 0,
+      revenue: 0,
+      costProduction: 0,
+      costCommercial: 0,
+      costMarketing: 0,
+      costAdmin: 0,
+    }
+  );
+
+  const totalCosts =
+    totals.costProduction + totals.costCommercial + totals.costMarketing + totals.costAdmin;
+
+  return {
+    year,
+    ...totals,
+    totalCosts,
+    cashNet: totals.revenue - totalCosts,
+    monthsWithData: months.length,
+    firstMonth: months[0]?.month ?? null,
+    lastMonth: months[months.length - 1]?.month ?? null,
+  };
+}
+
+/** Percentage change between two years' figures, or null when there's no base to compare against. */
+export function yearOverYearChange(current: number, previous: number): number | null {
+  if (previous === 0) return null;
+  return ((current - previous) / Math.abs(previous)) * 100;
+}
+
+/** Progress of a year's actual revenue against its business-plan target. */
+export function targetProgress(actual: number, target: number): number {
+  if (target === 0) return 0;
+  return (actual / target) * 100;
 }

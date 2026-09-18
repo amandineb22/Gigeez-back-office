@@ -1,0 +1,232 @@
+{
+  "source_file": "Gigeez_Profit & Loss_January 2026.xlsx",
+  "generated_note": "Extracted from the P&L and BP (Target) sheets. All money is stored in QAR, the app's base currency. Monthly rows come from the P&L sheet: 'revenue' is the sum of the per-style REV_UNIT PRICE rows (which hold monthly revenue totals per style, not unit prices) and the cost groups are the sheet's own PROD / COMMERCIAL / MARKETING / ADMIN bands. Costs are cash paid in the month, not the cost of goods sold that month. BP targets are stated in EUR in the sheet and converted at 4.124499999999999 QAR/EUR (cell A1); the original euro figures are kept alongside for reference.",
+  "base_currency": "QAR",
+  "qar_per_eur": 4.124499999999999,
+  "monthly": [
+    {
+      "month": "2025-04-01",
+      "units": 22,
+      "revenue": 8221.32,
+      "cost_production": 11120.0,
+      "cost_commercial": 182.0,
+      "cost_marketing": 14935.25,
+      "cost_admin": 900.0
+    },
+    {
+      "month": "2025-05-01",
+      "units": 18,
+      "revenue": 7790.7,
+      "cost_production": 10654.38,
+      "cost_commercial": 1345.0,
+      "cost_marketing": 24688.25,
+      "cost_admin": 0.0
+    },
+    {
+      "month": "2025-06-01",
+      "units": 13,
+      "revenue": 7007.53,
+      "cost_production": 2457.0,
+      "cost_commercial": 0.0,
+      "cost_marketing": 2787.25,
+      "cost_admin": 0.0
+    },
+    {
+      "month": "2025-07-01",
+      "units": 21,
+      "revenue": 10805.0,
+      "cost_production": 382.0,
+      "cost_commercial": 0.0,
+      "cost_marketing": 2178.25,
+      "cost_admin": 0.0
+    },
+    {
+      "month": "2025-08-01",
+      "units": 23,
+      "revenue": 12098.0,
+      "cost_production": 0.0,
+      "cost_commercial": 0.0,
+      "cost_marketing": 2178.25,
+      "cost_admin": 509.0
+    },
+    {
+      "month": "2025-09-01",
+      "units": 36,
+      "revenue": 15169.0,
+      "cost_production": 5440.0,
+      "cost_commercial": 0.0,
+      "cost_marketing": 2178.25,
+      "cost_admin": 0.0
+    },
+    {
+      "month": "2025-10-01",
+      "units": 17,
+      "revenue": 5636.0,
+      "cost_production": 10245.26,
+      "cost_commercial": 2903.0,
+      "cost_marketing": 2269.25,
+      "cost_admin": 0.0
+    },
+    {
+      "month": "2025-11-01",
+      "units": 16,
+      "revenue": 6420.0,
+      "cost_production": 4105.0,
+      "cost_commercial": 0.0,
+      "cost_marketing": 366.0,
+      "cost_admin": 0.0
+    },
+    {
+      "month": "2025-12-01",
+      "units": 17,
+      "revenue": 11022.0,
+      "cost_production": 469.0,
+      "cost_commercial": 0.0,
+      "cost_marketing": 116.0,
+      "cost_admin": 0.0
+    },
+    {
+      "month": "2026-01-01",
+      "units": 15,
+      "revenue": 23660.0,
+      "cost_production": 4506.0,
+      "cost_commercial": 2420.0,
+      "cost_marketing": 8116.0,
+      "cost_admin": 1289.0
+    },
+    {
+      "month": "2026-02-01",
+      "units": 10,
+      "revenue": 4920.0,
+      "cost_production": 3820.0,
+      "cost_commercial": 0.0,
+      "cost_marketing": 116.0,
+      "cost_admin": 0.0
+    },
+    {
+      "month": "2026-03-01",
+      "units": 12,
+      "revenue": 5933.0,
+      "cost_production": 165.0,
+      "cost_commercial": 0.0,
+      "cost_marketing": 116.0,
+      "cost_admin": 2300.0
+    },
+    {
+      "month": "2026-04-01",
+      "units": 1,
+      "revenue": 740.0,
+      "cost_production": 7277.0,
+      "cost_commercial": 0.0,
+      "cost_marketing": 866.0,
+      "cost_admin": 0.0
+    },
+    {
+      "month": "2026-05-01",
+      "units": 16,
+      "revenue": 12771.0,
+      "cost_production": 1900.0,
+      "cost_commercial": 180.0,
+      "cost_marketing": 8116.0,
+      "cost_admin": 2000.0
+    },
+    {
+      "month": "2026-06-01",
+      "units": 121,
+      "revenue": 86679.0,
+      "cost_production": 1522.0,
+      "cost_commercial": 0.0,
+      "cost_marketing": 5332.0,
+      "cost_admin": 0.0
+    },
+    {
+      "month": "2026-07-01",
+      "units": 5,
+      "revenue": 2315.0,
+      "cost_production": 0.0,
+      "cost_commercial": 0.0,
+      "cost_marketing": 16265.0,
+      "cost_admin": 0.0
+    },
+    {
+      "month": "2026-08-01",
+      "units": 9,
+      "revenue": 5510.0,
+      "cost_production": 4410.0,
+      "cost_commercial": 150.0,
+      "cost_marketing": 3500.0,
+      "cost_admin": 400.0
+    },
+    {
+      "month": "2026-09-01",
+      "units": 3,
+      "revenue": 4455.0,
+      "cost_production": 0.0,
+      "cost_commercial": 0.0,
+      "cost_marketing": 0.0,
+      "cost_admin": 0.0
+    }
+  ],
+  "bp_targets": [
+    {
+      "year": 2023,
+      "units": 130,
+      "revenue": 55990.09,
+      "expenses": 16786.71,
+      "ebitda": 39203.37,
+      "revenue_eur": 13575.0,
+      "expenses_eur": 4070.0,
+      "ebitda_eur": 9505.0
+    },
+    {
+      "year": 2024,
+      "units": 205,
+      "revenue": 88264.3,
+      "expenses": 26726.76,
+      "ebitda": 61537.54,
+      "revenue_eur": 21400.0,
+      "expenses_eur": 6480.0,
+      "ebitda_eur": 14920.0
+    },
+    {
+      "year": 2025,
+      "units": 570,
+      "revenue": 285002.95,
+      "expenses": 133015.12,
+      "ebitda": 151987.82,
+      "revenue_eur": 69100.0,
+      "expenses_eur": 32250.0,
+      "ebitda_eur": 36850.0
+    },
+    {
+      "year": 2026,
+      "units": 1265,
+      "revenue": 665591.19,
+      "expenses": 307811.43,
+      "ebitda": 357779.75,
+      "revenue_eur": 161375.0,
+      "expenses_eur": 74630.0,
+      "ebitda_eur": 86745.0
+    },
+    {
+      "year": 2027,
+      "units": 2895,
+      "revenue": 1710533.26,
+      "expenses": 787078.33,
+      "ebitda": 923454.93,
+      "revenue_eur": 414725.0,
+      "expenses_eur": 190830.0,
+      "ebitda_eur": 223895.0
+    },
+    {
+      "year": 2028,
+      "units": 5505,
+      "revenue": 3461074.17,
+      "expenses": 1562154.37,
+      "ebitda": 1898919.8,
+      "revenue_eur": 839150.0,
+      "expenses_eur": 378750.0,
+      "ebitda_eur": 460400.0
+    }
+  ]
+}

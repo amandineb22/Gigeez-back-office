@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { formatCurrency } from "@/lib/utils";
+import { useCurrency } from "@/lib/useCurrency";
 import { sellThroughRate } from "@/lib/calculations";
 import type { InventoryRow } from "@/lib/types";
 import { Badge } from "@/components/ui/Badge";
@@ -28,6 +29,8 @@ export function StockTable({
   deadStockIds: Set<string>;
   unitsSoldByVariant: Map<string, number>;
 }) {
+  const currency = useCurrency();
+
   const [query, setQuery] = useState("");
   const [productName, setProductName] = useState<string>("all");
 
@@ -125,7 +128,7 @@ export function StockTable({
                     </div>
                   </Td>
                   <Td>{row.stock_quantity}</Td>
-                  <Td>{row.retail_price != null ? formatCurrency(row.retail_price) : "—"}</Td>
+                  <Td>{row.retail_price != null ? formatCurrency(row.retail_price, currency) : "—"}</Td>
                   <Td>{sellThrough.toFixed(0)}%</Td>
                   <Td>
                     <div className="flex flex-wrap gap-1">

@@ -244,3 +244,44 @@ export const EXPENSE_CATEGORIES: ExpenseCategory[] = [
 ];
 
 export const PAYMENT_METHODS = ["card", "cash", "bank transfer", "paypal", "other"];
+
+/**
+ * A month of actuals from the Gigeez P&L spreadsheet. Amounts are in QAR, and
+ * the four cost columns are the spreadsheet's own bands. Kept apart from
+ * `Sale` / `Expense`, which record individual pieces and individual expense
+ * lines: the two describe the same business but are never added together.
+ */
+export interface FinancialMonth {
+  id: string;
+  month: string; // ISO date, always the 1st
+  units: number;
+  revenue: number;
+  cost_production: number;
+  cost_commercial: number;
+  cost_marketing: number;
+  cost_admin: number;
+  created_at: string;
+  updated_at: string;
+}
+
+/** A year of business-plan targets from the BP (Target) sheet, stored in QAR. */
+export interface BpTarget {
+  id: string;
+  year: number;
+  units: number;
+  revenue: number;
+  expenses: number;
+  ebitda: number;
+  created_at: string;
+  updated_at: string;
+}
+
+/** The spreadsheet's cost bands, in the order they appear on the dashboard. */
+export const FINANCIAL_COST_BANDS = [
+  { key: "cost_production", label: "Production" },
+  { key: "cost_commercial", label: "Commercial" },
+  { key: "cost_marketing", label: "Marketing" },
+  { key: "cost_admin", label: "Admin" },
+] as const;
+
+export type FinancialCostBand = (typeof FINANCIAL_COST_BANDS)[number]["key"];

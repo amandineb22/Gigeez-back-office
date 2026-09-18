@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { getProductWithVariants } from "@/lib/data/products";
 import { deleteVariant } from "@/lib/actions/variants";
 import { formatCurrency } from "@/lib/utils";
+import { parseCurrencyParam } from "@/lib/currency";
 import { Card, CardHeader, CardTitle } from "@/components/ui/Card";
 import { LinkButton } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
@@ -9,8 +10,15 @@ import { Table, Thead, Th, Tr, Td } from "@/components/ui/Table";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ConfirmSubmitButton } from "@/components/ui/ConfirmSubmitButton";
 
-export default async function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function ProductDetailPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const { id } = await params;
+  const currency = parseCurrencyParam(await searchParams);
   const data = await getProductWithVariants(id);
   if (!data) notFound();
   const { product, variants } = data;
@@ -21,7 +29,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
         <div>
           <h1 className="font-display text-2xl text-ink">{product.name}</h1>
           <p className="mt-1 text-sm text-ink/50">
-            {product.category} · Base cost {formatCurrency(product.base_cost)}/unit
+            {product.category} · Base cost {formatCurrency(product.base_cost, currency)}/unit
           </p>
           {product.notes && <p className="mt-2 max-w-xl text-sm text-ink/60">{product.notes}</p>}
         </div>
@@ -72,7 +80,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                   <Td className="whitespace-nowrap text-xs text-ink/60">
                     {[v.length, v.style, v.material].filter(Boolean).join(" · ") || "—"}
                   </Td>
-                  <Td>{v.retail_price != null ? formatCurrency(v.retail_price) : "—"}</Td>
+                  <Td>{v.retail_price != null ? formatCurrency(v.retail_price, currency) : "—"}</Td>
                   <Td>
                     {v.stock_quantity}
                     {v.stock_quantity <= v.reorder_point && (

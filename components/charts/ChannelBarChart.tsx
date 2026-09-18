@@ -10,6 +10,7 @@ import {
   YAxis,
 } from "recharts";
 import { formatCurrency, formatCurrencyCompact, toTitleCase } from "@/lib/utils";
+import { useCurrency } from "@/lib/useCurrency";
 import { CHART_COLORS, tooltipStyle } from "./chart-theme";
 
 export interface ChannelBarDatum {
@@ -18,6 +19,8 @@ export interface ChannelBarDatum {
 }
 
 export function ChannelBarChart({ data }: { data: ChannelBarDatum[] }) {
+  const currency = useCurrency();
+
   return (
     <ResponsiveContainer width="100%" height={240}>
       <BarChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
@@ -31,14 +34,14 @@ export function ChannelBarChart({ data }: { data: ChannelBarDatum[] }) {
         />
         <YAxis
           tick={{ fontSize: 12, fill: CHART_COLORS.axis }}
-          tickFormatter={(v) => formatCurrencyCompact(v)}
+          tickFormatter={(v) => formatCurrencyCompact(v, currency)}
           axisLine={false}
           tickLine={false}
           width={56}
         />
         <Tooltip
           {...tooltipStyle}
-          formatter={(value: number) => [formatCurrency(value), "Revenue"]}
+          formatter={(value: number) => [formatCurrency(value, currency), "Revenue"]}
           labelFormatter={(label: string) => toTitleCase(label)}
         />
         <Bar dataKey="revenue" fill={CHART_COLORS.revenue} radius={[6, 6, 0, 0]} maxBarSize={48} />

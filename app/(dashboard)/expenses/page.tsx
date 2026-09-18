@@ -1,6 +1,7 @@
 import { getExpensesInRange } from "@/lib/data/expenses";
 import { deleteExpense } from "@/lib/actions/expenses";
 import { parseDateRangeParams, formatCurrency, formatDate, toTitleCase } from "@/lib/utils";
+import { parseCurrencyParam } from "@/lib/currency";
 import { Card } from "@/components/ui/Card";
 import { LinkButton } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
@@ -13,7 +14,9 @@ export default async function ExpensesPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const range = parseDateRangeParams(await searchParams);
+  const params = await searchParams;
+  const range = parseDateRangeParams(params);
+  const currency = parseCurrencyParam(params);
   const expenses = await getExpensesInRange(range);
 
   return (
@@ -59,7 +62,7 @@ export default async function ExpensesPage({
                     <Badge variant={e.cost_type === "fixed" ? "brand" : "neutral"}>{toTitleCase(e.cost_type)}</Badge>
                   </Td>
                   <Td>{e.vendor ?? "—"}</Td>
-                  <Td className="font-medium text-ink">{formatCurrency(e.amount)}</Td>
+                  <Td className="font-medium text-ink">{formatCurrency(e.amount, currency)}</Td>
                   <Td>
                     <div className="flex items-center justify-end gap-1">
                       <LinkButton href={`/expenses/${e.id}/edit`} variant="ghost" size="sm">

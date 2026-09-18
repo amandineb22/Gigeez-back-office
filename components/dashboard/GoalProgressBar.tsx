@@ -1,6 +1,7 @@
 import { cn, formatCurrency, formatPercent } from "@/lib/utils";
 import { GoalStatusBadge } from "./GoalStatusBadge";
 import type { GoalProgress } from "@/lib/calculations";
+import { BASE_CURRENCY, type Currency } from "@/lib/currency";
 
 const BAR_COLOR: Record<GoalProgress["status"], string> = {
   "on-track": "bg-emerald-500",
@@ -8,7 +9,15 @@ const BAR_COLOR: Record<GoalProgress["status"], string> = {
   behind: "bg-red-500",
 };
 
-export function GoalProgressBar({ title, progress }: { title: string; progress: GoalProgress }) {
+export function GoalProgressBar({
+  title,
+  progress,
+  currency = BASE_CURRENCY,
+}: {
+  title: string;
+  progress: GoalProgress;
+  currency?: Currency;
+}) {
   const pct = Math.min(Math.max(progress.percentOfTarget, 0), 100);
 
   return (
@@ -24,7 +33,7 @@ export function GoalProgressBar({ title, progress }: { title: string; progress: 
         />
       </div>
       <p className="mt-1.5 text-xs text-ink/50">
-        {formatCurrency(progress.actual)} of {formatCurrency(progress.target)} ({formatPercent(progress.percentOfTarget, 0)})
+        {formatCurrency(progress.actual, currency)} of {formatCurrency(progress.target, currency)} ({formatPercent(progress.percentOfTarget, 0)})
       </p>
     </div>
   );

@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/Card";
 import { cn, formatCurrency, formatPercent } from "@/lib/utils";
 import type { KpiTrend } from "@/lib/calculations";
+import { BASE_CURRENCY, type Currency } from "@/lib/currency";
 
 function TrendPill({ changePct, label }: { changePct: number | null; label: string }) {
   if (changePct === null) {
@@ -25,12 +26,15 @@ export function KpiCard({
   label,
   trend,
   format = "currency",
+  currency = BASE_CURRENCY,
 }: {
   label: string;
   trend: KpiTrend;
   format?: "currency" | "number";
+  currency?: Currency;
 }) {
-  const displayValue = format === "currency" ? formatCurrency(trend.current) : Math.round(trend.current).toLocaleString();
+  const displayValue =
+    format === "currency" ? formatCurrency(trend.current, currency) : Math.round(trend.current).toLocaleString();
 
   return (
     <Card>

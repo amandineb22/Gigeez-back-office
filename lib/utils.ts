@@ -8,33 +8,33 @@ import {
   subDays,
   subYears,
 } from "date-fns";
+import {
+  BASE_CURRENCY,
+  formatMoney,
+  formatMoneyCompact,
+  type Currency,
+} from "./currency";
 
 export function cn(...inputs: ClassValue[]) {
   return clsx(inputs);
 }
 
-// All prices in this business (from the Gigeez stock sheet) are in Qatari
-// Riyal, so money is formatted as QAR rather than USD throughout the app.
-const currencyFormatter = new Intl.NumberFormat("en-US", {
-  style: "currency",
-  currency: "QAR",
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
-});
+/**
+ * Money helpers. Amounts are always *stored* in QAR (see lib/currency.ts);
+ * `currency` only picks how they are displayed, and defaults to QAR so call
+ * sites that have no currency in scope keep their previous behaviour.
+ */
 
-/** Formats a number as QAR, e.g. formatCurrency(1234.5) -> "QAR 1,234.50" */
-export function formatCurrency(amount: number): string {
-  if (!Number.isFinite(amount)) return currencyFormatter.format(0);
-  return currencyFormatter.format(amount);
+/** Formats a QAR amount in the display currency, e.g. formatCurrency(1234.5) -> "QAR 1,234.50" */
+export function formatCurrency(amount: number, currency: Currency = BASE_CURRENCY): string {
+  if (!Number.isFinite(amount)) return formatMoney(0, currency);
+  return formatMoney(amount, currency);
 }
 
 /** Compact currency for tight spaces like chart axes, e.g. "QAR 12.3k" */
-export function formatCurrencyCompact(amount: number): string {
-  if (!Number.isFinite(amount)) return "QAR 0";
-  const abs = Math.abs(amount);
-  if (abs >= 1_000_000) return `QAR ${(amount / 1_000_000).toFixed(1)}M`;
-  if (abs >= 1_000) return `QAR ${(amount / 1_000).toFixed(1)}k`;
-  return `QAR ${amount.toFixed(0)}`;
+export function formatCurrencyCompact(amount: number, currency: Currency = BASE_CURRENCY): string {
+  if (!Number.isFinite(amount)) return formatMoneyCompact(0, currency);
+  return formatMoneyCompact(amount, currency);
 }
 
 export function formatPercent(value: number, digits = 1): string {

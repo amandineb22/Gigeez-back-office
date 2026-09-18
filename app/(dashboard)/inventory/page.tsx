@@ -1,6 +1,7 @@
 import { getInventory, getStockUnits } from "@/lib/data/inventory";
 import { getAllSales, getSalesInRange } from "@/lib/data/sales";
 import { parseDateRangeParams, formatCurrency } from "@/lib/utils";
+import { parseCurrencyParam } from "@/lib/currency";
 import { calculateInventoryValue, lowStockItems, findDeadStock } from "@/lib/calculations";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -24,7 +25,9 @@ export default async function InventoryPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const range = parseDateRangeParams(await searchParams);
+  const params = await searchParams;
+  const range = parseDateRangeParams(params);
+  const currency = parseCurrencyParam(params);
   const [inventoryRaw, stockUnits, allSales, salesInRange] = await Promise.all([
     getInventory(),
     getStockUnits(),
@@ -83,7 +86,7 @@ export default async function InventoryPage({
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Card>
           <p className="text-xs font-medium uppercase tracking-wide text-ink/40">Inventory value</p>
-          <p className="mt-2 font-display text-2xl text-ink">{formatCurrency(inventoryValue)}</p>
+          <p className="mt-2 font-display text-2xl text-ink">{formatCurrency(inventoryValue, currency)}</p>
         </Card>
         <Card>
           <p className="text-xs font-medium uppercase tracking-wide text-ink/40">Low stock SKUs</p>

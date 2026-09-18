@@ -10,6 +10,7 @@ import {
   type PnLGrouping,
 } from "@/lib/calculations";
 import { parseDateRangeParams, formatCurrency, formatPercent } from "@/lib/utils";
+import { parseCurrencyParam } from "@/lib/currency";
 import { Card, CardHeader, CardTitle } from "@/components/ui/Card";
 import { LinkButton } from "@/components/ui/Button";
 import { Table, Thead, Th, Tr, Td } from "@/components/ui/Table";
@@ -22,6 +23,7 @@ export default async function ReportsPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const sp = await searchParams;
+  const currency = parseCurrencyParam(sp);
   const range = parseDateRangeParams(sp);
   const grouping = (["month", "quarter", "year"].includes(String(sp.grouping)) ? sp.grouping : "month") as PnLGrouping;
   const cashOnHand = Number(sp.cash ?? 0) || 0;
@@ -85,13 +87,13 @@ export default async function ReportsPage({
                 {pnlRows.map((row) => (
                   <Tr key={row.periodStart}>
                     <Td className="font-medium text-ink">{row.periodLabel}</Td>
-                    <Td>{formatCurrency(row.revenue)}</Td>
-                    <Td>{formatCurrency(row.cogs)}</Td>
-                    <Td>{formatCurrency(row.grossProfit)}</Td>
+                    <Td>{formatCurrency(row.revenue, currency)}</Td>
+                    <Td>{formatCurrency(row.cogs, currency)}</Td>
+                    <Td>{formatCurrency(row.grossProfit, currency)}</Td>
                     <Td>{formatPercent(row.grossMarginPct)}</Td>
-                    <Td>{formatCurrency(row.operatingExpenses)}</Td>
+                    <Td>{formatCurrency(row.operatingExpenses, currency)}</Td>
                     <Td className={row.netProfit < 0 ? "font-medium text-red-600" : "font-medium text-emerald-700"}>
-                      {formatCurrency(row.netProfit)}
+                      {formatCurrency(row.netProfit, currency)}
                     </Td>
                     <Td>{formatPercent(row.netMarginPct)}</Td>
                   </Tr>
@@ -121,10 +123,10 @@ export default async function ReportsPage({
                   {cashFlowRows.map((row) => (
                     <Tr key={row.periodStart}>
                       <Td className="font-medium text-ink">{row.periodLabel}</Td>
-                      <Td>{formatCurrency(row.cashIn)}</Td>
-                      <Td>{formatCurrency(row.cashOut)}</Td>
-                      <Td className={row.net < 0 ? "text-red-600" : "text-emerald-700"}>{formatCurrency(row.net)}</Td>
-                      <Td className="font-medium text-ink">{formatCurrency(row.runningBalance)}</Td>
+                      <Td>{formatCurrency(row.cashIn, currency)}</Td>
+                      <Td>{formatCurrency(row.cashOut, currency)}</Td>
+                      <Td className={row.net < 0 ? "text-red-600" : "text-emerald-700"}>{formatCurrency(row.net, currency)}</Td>
+                      <Td className="font-medium text-ink">{formatCurrency(row.runningBalance, currency)}</Td>
                     </Tr>
                   ))}
                 </tbody>
@@ -137,7 +139,7 @@ export default async function ReportsPage({
                 {runway === null ? "∞" : `${runway.toFixed(1)} months`}
               </p>
               <p className="mt-1 text-xs text-ink/40">
-                Based on {formatCurrency(cashOnHand)} cash on hand ÷ {formatCurrency(avgMonthlyExpenses)}/mo avg. expenses
+                Based on {formatCurrency(cashOnHand, currency)} cash on hand ÷ {formatCurrency(avgMonthlyExpenses, currency)}/mo avg. expenses
               </p>
             </Card>
           </div>
@@ -163,8 +165,8 @@ export default async function ReportsPage({
                   <Tr key={p.product_id}>
                     <Td className="font-medium text-ink">{p.product_name}</Td>
                     <Td>{p.unitsSold}</Td>
-                    <Td>{formatCurrency(p.revenue)}</Td>
-                    <Td className={p.profit < 0 ? "text-red-600" : "text-emerald-700"}>{formatCurrency(p.profit)}</Td>
+                    <Td>{formatCurrency(p.revenue, currency)}</Td>
+                    <Td className={p.profit < 0 ? "text-red-600" : "text-emerald-700"}>{formatCurrency(p.profit, currency)}</Td>
                     <Td>{formatPercent(p.marginPct)}</Td>
                   </Tr>
                 ))}
