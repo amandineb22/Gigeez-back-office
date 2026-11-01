@@ -67,13 +67,17 @@ clear the tables first if you want to reseed.
 
 ## 5b. Import the real Gigeez stock data
 
-`data/imports/2026-09-13-stock-import.json` is a cleaned-up snapshot of the
-"Gigeez Master data stock" spreadsheet (13 Sep 2026): every model becomes a
-product, every unique length/size/style/color/material combination becomes a
-variant/SKU, every physical piece still on hand becomes a stock unit (with
-its bin/location — own warehouse or a consignment boutique), and every piece
-already marked "sold" becomes a historical sale (shown with an "Unknown"
-date/channel badge in the Sales page, since the sheet didn't record those).
+`data/imports/2026-10-14-stock-import.json` is a cleaned-up snapshot of the
+"Gigeez Master data stock" spreadsheet (14 Oct 2026, the current default —
+an earlier 13 Sep 2026 snapshot is also kept in the folder for reference):
+every model becomes a product, every unique length/size/style/color/material
+combination becomes a variant/SKU, every physical piece still marked in
+stock (the sheet's `Stock (# units)` column, not the bin text — a piece sat
+at a consignment reseller is still "in stock", just not at the warehouse)
+becomes a stock unit with its bin/location, and every piece marked sold
+becomes a historical sale (shown with an "Unknown" date/channel badge in the
+Sales page, since the sheet doesn't record those — see "Reseller margins"
+below for tracking that on *future* sales instead).
 
 ```bash
 npm run import-stock
@@ -82,12 +86,18 @@ npm run import-stock
 Run this instead of (or in addition to) `npm run seed` — it's independent of
 the sample data. It refuses to run twice against the same project (to avoid
 duplicating hundreds of physical pieces); pass `--force` if you really want
-to re-import.
+to re-import, or first wipe the existing catalog with
+[`supabase/reset-stock-data.sql`](supabase/reset-stock-data.sql) if you're
+replacing it with a newer sheet (see the comment at the top of that file
+before running it — it deletes real product/stock/sales data).
 
 A handful of variants (see the script's console output, or search the JSON
 for `"price_estimated": true`) didn't have an exact price-tab match for
 their length, so their price was estimated from that model's other lengths —
-worth double-checking those SKUs in the Products page after import.
+worth double-checking those SKUs in the Products page after import. Three
+`ADRIANA` SKUs have no retail price in the sheet at all (its Prices-tab rows
+are all QAR 0) and import with a QAR 0 historical sale price — also worth a
+manual correction once you have the real figure.
 
 ## 5d. Import the profit and loss spreadsheet
 
@@ -223,6 +233,7 @@ components/
 theme/config.ts           Brand colors, font names, logo — see Rebranding
 supabase/schema.sql       Full schema, views, RLS policies
 supabase/add-resellers.sql  The reseller directory + sales columns, standalone
+supabase/reset-stock-data.sql  Wipes products/variants/stock/sales for a fresh re-import
 supabase/cleanup-demo-data.sql  Deletes the sample data from npm run seed
 scripts/seed.ts           Sample data generator
 scripts/import-stock.ts   One-time importer for the real Gigeez stock data
