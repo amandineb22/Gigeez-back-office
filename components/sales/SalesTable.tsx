@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { formatCurrency, formatDate, toTitleCase, cn } from "@/lib/utils";
 import { useCurrency } from "@/lib/useCurrency";
+import { formatMoney } from "@/lib/currency";
 import type { SaleWithDetails } from "@/lib/types";
 import { Badge } from "@/components/ui/Badge";
 import { LinkButton } from "@/components/ui/Button";
@@ -66,8 +67,9 @@ export function SalesTable({
               <Th>SKU</Th>
               <Th>Qty</Th>
               <Th>Unit price</Th>
+              <Th>Reseller</Th>
               <Th>Channel</Th>
-              <Th>Revenue</Th>
+              <Th>Revenue (Gigeez's take)</Th>
               <Th>Profit</Th>
               <Th />
             </tr>
@@ -98,6 +100,13 @@ export function SalesTable({
                   <Td>{s.quantity}</Td>
                   <Td>{formatCurrency(s.unit_price, currency)}</Td>
                   <Td>
+                    {s.reseller_name ? (
+                      <Badge variant={s.reseller_type === "wholesale" ? "brand" : "neutral"}>{s.reseller_name}</Badge>
+                    ) : (
+                      <span className="text-ink/40">Direct</span>
+                    )}
+                  </Td>
+                  <Td>
                     {s.channel === "unknown" ? (
                       <Badge variant="neutral" title="No sale channel was recorded for this piece">
                         Unknown
@@ -111,7 +120,12 @@ export function SalesTable({
                       </Badge>
                     )}
                   </Td>
-                  <Td className={cn("font-medium", s.revenue < 0 ? "text-red-600" : "text-ink")}>{formatCurrency(s.revenue, currency)}</Td>
+                  <Td className={cn("font-medium", s.revenue < 0 ? "text-red-600" : "text-ink")}>
+                    {formatCurrency(s.revenue, currency)}
+                    <div className="mt-0.5 text-[11px] font-normal text-ink/40">
+                      {formatMoney(s.revenue, "QAR")} · {formatMoney(s.revenue, "EUR")} · {formatMoney(s.revenue, "USD")}
+                    </div>
+                  </Td>
                   <Td className={cn("font-medium", s.profit < 0 ? "text-red-600" : "text-emerald-700")}>{formatCurrency(s.profit, currency)}</Td>
                   <Td>
                     <div className="flex items-center justify-end gap-1">

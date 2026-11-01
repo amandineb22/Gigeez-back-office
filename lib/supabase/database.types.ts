@@ -7,7 +7,7 @@
  * and this file can be replaced wholesale.
  */
 
-import type { Channel, CostType, ExpenseCategory, GoalMetric, GoalPeriod } from "@/lib/types";
+import type { Channel, CostType, ExpenseCategory, GoalMetric, GoalPeriod, ResellerType } from "@/lib/types";
 
 type Timestamps = {
   created_at: string;
@@ -129,14 +129,38 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["suppliers"]["Insert"]>;
         Relationships: Relationship[];
       };
+      resellers: {
+        Row: {
+          id: string;
+          name: string;
+          type: ResellerType;
+          currency: "QAR" | "EUR" | "USD";
+          gigeez_share_pct: number;
+          bin_locations: string[];
+          notes: string | null;
+        } & Timestamps;
+        Insert: {
+          id?: string;
+          name: string;
+          type: ResellerType;
+          currency: "QAR" | "EUR" | "USD";
+          gigeez_share_pct: number;
+          bin_locations?: string[];
+          notes?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["resellers"]["Insert"]>;
+        Relationships: Relationship[];
+      };
       sales: {
         Row: {
           id: string;
           sale_date: string | null;
           variant_id: string;
           stock_unit_id: string | null;
+          reseller_id: string | null;
           quantity: number;
           unit_price: number;
+          retail_unit_price: number | null;
           channel: Channel;
           payment_method: string;
           discount: number;
@@ -148,8 +172,10 @@ export interface Database {
           sale_date?: string | null;
           variant_id: string;
           stock_unit_id?: string | null;
+          reseller_id?: string | null;
           quantity: number;
           unit_price: number;
+          retail_unit_price?: number | null;
           channel: Channel;
           payment_method?: string;
           discount?: number;
@@ -170,6 +196,13 @@ export interface Database {
             columns: ["stock_unit_id"];
             isOneToOne: false;
             referencedRelation: "stock_units";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "sales_reseller_id_fkey";
+            columns: ["reseller_id"];
+            isOneToOne: false;
+            referencedRelation: "resellers";
             referencedColumns: ["id"];
           },
         ];
@@ -351,6 +384,9 @@ export interface Database {
           sale_date: string | null;
           variant_id: string;
           stock_unit_id: string | null;
+          reseller_id: string | null;
+          reseller_name: string | null;
+          reseller_type: ResellerType | null;
           sku: string;
           size: string;
           color: string;
@@ -363,6 +399,7 @@ export interface Database {
           sold_from: string | null;
           quantity: number;
           unit_price: number;
+          retail_unit_price: number | null;
           channel: Channel;
           payment_method: string;
           discount: number;

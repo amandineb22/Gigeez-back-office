@@ -132,6 +132,24 @@ business but record it differently — the sheet is a monthly accounting view,
 the tables are individual pieces and individual expense lines — so the
 dashboard shows them as separate sections and never adds them together.
 
+## 5e. Reseller margins
+
+Dresses don't only sell direct — some go to consignment boutiques/hotels
+(Gigeez keeps ownership until *they* sell it) and some are bought outright by
+wholesale buyers. Either way, Gigeez only actually keeps a fraction of the
+retail price. The **Resellers** page is a directory of these partners (name,
+type, currency, and the percentage Gigeez actually keeps), seeded from their
+real invoices. "Add sale" has a **Reseller** field — pick one (or leave it as
+"Direct sale" for a walk-in/own-channel sale) and a **Currency** field for
+whatever currency you're reading the amount off the invoice in; the amount is
+converted to QAR and saved, so revenue and profit everywhere already reflect
+what Gigeez actually earned, not the sticker price.
+
+If the project already exists and you only need these additions, paste
+[`supabase/add-resellers.sql`](supabase/add-resellers.sql) into the SQL
+Editor instead of re-running the whole schema — it's the same statements on
+their own, and safe to run more than once.
+
 ## 5c. Removing the sample data
 
 If you ran `npm run seed` earlier and now want the placeholder products,
@@ -183,6 +201,7 @@ app/
     page.tsx              KPI dashboard home
     sales/ expenses/      Data entry: list + /new + /[id]/edit, each backed
     products/ suppliers/  by a server action in lib/actions/
+    resellers/
     purchase-orders/
     inventory/            Stock levels, low-stock + dead-stock flags
     goals/                Targets + progress bars
@@ -203,6 +222,7 @@ components/
   layout/                 Sidebar, top bar, global date-range filter
 theme/config.ts           Brand colors, font names, logo — see Rebranding
 supabase/schema.sql       Full schema, views, RLS policies
+supabase/add-resellers.sql  The reseller directory + sales columns, standalone
 supabase/cleanup-demo-data.sql  Deletes the sample data from npm run seed
 scripts/seed.ts           Sample data generator
 scripts/import-stock.ts   One-time importer for the real Gigeez stock data

@@ -5,6 +5,8 @@
 
 export type Channel = "online" | "in-store" | "wholesale" | "pop-up" | "unknown";
 
+export type ResellerType = "consignment" | "wholesale";
+
 export type StockUnitStatus = "in_stock" | "sold";
 
 export type ExpenseCategory =
@@ -104,6 +106,20 @@ export interface Supplier {
   updated_at: string;
 }
 
+export interface Reseller {
+  id: string;
+  name: string;
+  type: ResellerType;
+  currency: "QAR" | "EUR" | "USD";
+  /** Percentage of the retail/invoice price Gigeez actually keeps (100 for wholesale). */
+  gigeez_share_pct: number;
+  /** Stock-sheet bin name(s) this reseller corresponds to, for reference only. */
+  bin_locations: string[];
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Sale {
   id: string;
   /** Null means the sale date wasn't recorded (shown as "Unknown"). */
@@ -111,8 +127,13 @@ export interface Sale {
   variant_id: string;
   /** Optional link to the exact physical piece sold (stock_units). */
   stock_unit_id: string | null;
+  /** Null for a direct sale — Gigeez keeps 100% of unit_price. */
+  reseller_id: string | null;
   quantity: number;
+  /** What Gigeez actually receives per unit, in QAR — already net of any reseller cut. */
   unit_price: number;
+  /** Optional reference figure: what the end customer paid, in QAR. Never used in revenue/profit. */
+  retail_unit_price: number | null;
   channel: Channel;
   payment_method: string;
   discount: number;
@@ -128,6 +149,10 @@ export interface SaleWithDetails {
   sale_date: string | null;
   variant_id: string;
   stock_unit_id: string | null;
+  reseller_id: string | null;
+  /** Null for a direct sale. */
+  reseller_name: string | null;
+  reseller_type: ResellerType | null;
   sku: string;
   size: string;
   color: string;
@@ -141,6 +166,7 @@ export interface SaleWithDetails {
   sold_from: string | null;
   quantity: number;
   unit_price: number;
+  retail_unit_price: number | null;
   channel: Channel;
   payment_method: string;
   discount: number;
