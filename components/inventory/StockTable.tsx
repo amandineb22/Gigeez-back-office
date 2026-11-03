@@ -3,7 +3,6 @@
 import { useMemo, useState } from "react";
 import { formatCurrency } from "@/lib/utils";
 import { useCurrency } from "@/lib/useCurrency";
-import { sellThroughRate } from "@/lib/calculations";
 import type { InventoryRow } from "@/lib/types";
 import { Badge } from "@/components/ui/Badge";
 import { Table, Thead, Th, Tr, Td } from "@/components/ui/Table";
@@ -23,11 +22,9 @@ function attributeTag(row: StockRow): string | null {
 export function StockTable({
   rows,
   deadStockIds,
-  unitsSoldByVariant,
 }: {
   rows: StockRow[];
   deadStockIds: Set<string>;
-  unitsSoldByVariant: Map<string, number>;
 }) {
   const currency = useCurrency();
 
@@ -96,15 +93,12 @@ export function StockTable({
               <Th>Locations</Th>
               <Th>Stock</Th>
               <Th>Retail price</Th>
-              <Th>Sell-through (range)</Th>
               <Th>Status</Th>
             </tr>
           </Thead>
           <tbody>
             {filtered.map((row) => {
               const tag = attributeTag(row);
-              const unitsSold = unitsSoldByVariant.get(row.variant_id) ?? 0;
-              const sellThrough = sellThroughRate(unitsSold, row.stock_quantity);
               return (
                 <Tr key={row.variant_id}>
                   <Td className="font-medium text-ink">
@@ -129,7 +123,6 @@ export function StockTable({
                   </Td>
                   <Td>{row.stock_quantity}</Td>
                   <Td>{row.retail_price != null ? formatCurrency(row.retail_price, currency) : "—"}</Td>
-                  <Td>{sellThrough.toFixed(0)}%</Td>
                   <Td>
                     <div className="flex flex-wrap gap-1">
                       {row.low_stock && <Badge variant="warning">Low stock</Badge>}

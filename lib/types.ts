@@ -9,8 +9,15 @@ export type ResellerType = "consignment" | "wholesale";
 
 export type StockUnitStatus = "in_stock" | "sold";
 
-/** The P&L sheet's own grouping — Production/Commercial/Marketing/Admin. */
-export type ExpenseCategoryBand = "production" | "commercial" | "marketing" | "admin";
+/**
+ * The main groups an expense category sits under. Production/Commercial/
+ * Marketing/Admin are the P&L sheet's own bands; "events" is its own band
+ * here even though the sheet nests "Events / Shows" inside Marketing —
+ * callers that total straight from the sheet's own 4 columns (the dashboard's
+ * monthly P&L figures) still show it folded into Marketing, since the sheet
+ * never breaks it out separately.
+ */
+export type ExpenseCategoryBand = "production" | "commercial" | "marketing" | "admin" | "events";
 
 /** A row from the governed, extensible expense_categories list (see supabase/schema.sql). */
 export interface ExpenseCategory {
@@ -260,7 +267,13 @@ export const CHANNELS: Channel[] = ["online", "in-store", "wholesale", "pop-up",
 /** Channels offered on the "Add sale" form — "unknown" is import-only and not a real choice going forward. */
 export const SALE_FORM_CHANNELS: Channel[] = ["online", "in-store", "wholesale", "pop-up"];
 
-export const EXPENSE_CATEGORY_BANDS: ExpenseCategoryBand[] = ["production", "commercial", "marketing", "admin"];
+export const EXPENSE_CATEGORY_BANDS: ExpenseCategoryBand[] = [
+  "production",
+  "commercial",
+  "marketing",
+  "events",
+  "admin",
+];
 
 export const PAYMENT_METHODS = ["card", "cash", "bank transfer", "paypal", "other"];
 

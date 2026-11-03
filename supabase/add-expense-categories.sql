@@ -21,9 +21,21 @@
 create table if not exists expense_categories (
   id uuid primary key default gen_random_uuid(),
   name text not null unique,
-  band text not null check (band in ('production', 'commercial', 'marketing', 'admin')),
+  band text not null check (band in ('production', 'commercial', 'marketing', 'events', 'admin')),
   created_at timestamptz not null default now()
 );
+
+-- Dropped and recreated unconditionally: "create table if not exists" above
+-- is a no-op on a database that already has this table, so the allowed band
+-- list (e.g. adding 'events') would otherwise never widen on an existing one.
+do $$
+begin
+  if exists (select 1 from pg_constraint where conname = 'expense_categories_band_check') then
+    alter table expense_categories drop constraint expense_categories_band_check;
+  end if;
+  alter table expense_categories add constraint expense_categories_band_check
+    check (band in ('production', 'commercial', 'marketing', 'events', 'admin'));
+end $$;
 
 insert into expense_categories (name, band) values
   ('Textile Saree Purchase', 'production'),
@@ -51,7 +63,7 @@ insert into expense_categories (name, band) values
   ('Social Media – Instagram Pub', 'marketing'),
   ('Website Maintenance', 'marketing'),
   ('Website Hosting (Shopify)', 'marketing'),
-  ('Events / Shows – Exhibition', 'marketing'),
+  ('Events / Shows – Exhibition', 'events'),
   ('Communication – Photo Shoot', 'marketing'),
   ('Communication – Look Book', 'marketing'),
   ('Marketing – Promotional Bags', 'marketing'),
@@ -75,8 +87,19 @@ begin
   end if;
 end $$;
 
-alter table expenses add column if not exists cost_band text
-  check (cost_band is null or cost_band in ('production', 'commercial', 'marketing', 'admin'));
+alter table expenses add column if not exists cost_band text;
+
+-- Dropped and recreated unconditionally: the allowed band list has grown
+-- since this ran (e.g. adding 'events'), and a database that already has
+-- this constraint needs it replaced, not left as-is.
+do $$
+begin
+  if exists (select 1 from pg_constraint where conname = 'expenses_cost_band_check') then
+    alter table expenses drop constraint expenses_cost_band_check;
+  end if;
+  alter table expenses add constraint expenses_cost_band_check
+    check (cost_band is null or cost_band in ('production', 'commercial', 'marketing', 'events', 'admin'));
+end $$;
 
 -- ----------------------------------------------------------------------------
 -- Relabel expenses already imported from the P&L sheet to the exact category
@@ -108,7 +131,7 @@ from (values
   ('social-media-instagram-pub', 'Social Media – Instagram Pub', 'marketing'),
   ('website-maintenance', 'Website Maintenance', 'marketing'),
   ('website-hosting-shopify', 'Website Hosting (Shopify)', 'marketing'),
-  ('events-shows-exhibition', 'Events / Shows – Exhibition', 'marketing'),
+  ('events-shows-exhibition', 'Events / Shows – Exhibition', 'events'),
   ('communication-photo-shoot', 'Communication – Photo Shoot', 'marketing'),
   ('communication-look-book', 'Communication – Look Book', 'marketing'),
   ('marketing-promotional-bags', 'Marketing – Promotional Bags', 'marketing'),

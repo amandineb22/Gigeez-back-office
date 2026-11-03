@@ -251,9 +251,21 @@ create index if not exists sales_channel_idx on sales (channel);
 create table if not exists expense_categories (
   id uuid primary key default gen_random_uuid(),
   name text not null unique,
-  band text not null check (band in ('production', 'commercial', 'marketing', 'admin')),
+  band text not null check (band in ('production', 'commercial', 'marketing', 'events', 'admin')),
   created_at timestamptz not null default now()
 );
+
+-- Dropped and recreated unconditionally: "create table if not exists" above
+-- is a no-op on a database that already has this table, so the allowed band
+-- list (e.g. adding 'events') would otherwise never widen on an existing one.
+do $$
+begin
+  if exists (select 1 from pg_constraint where conname = 'expense_categories_band_check') then
+    alter table expense_categories drop constraint expense_categories_band_check;
+  end if;
+  alter table expense_categories add constraint expense_categories_band_check
+    check (band in ('production', 'commercial', 'marketing', 'events', 'admin'));
+end $$;
 
 insert into expense_categories (name, band) values
   ('Textile Saree Purchase', 'production'),
@@ -281,7 +293,7 @@ insert into expense_categories (name, band) values
   ('Social Media – Instagram Pub', 'marketing'),
   ('Website Maintenance', 'marketing'),
   ('Website Hosting (Shopify)', 'marketing'),
-  ('Events / Shows – Exhibition', 'marketing'),
+  ('Events / Shows – Exhibition', 'events'),
   ('Communication – Photo Shoot', 'marketing'),
   ('Communication – Look Book', 'marketing'),
   ('Marketing – Promotional Bags', 'marketing'),
@@ -305,7 +317,7 @@ create table if not exists expenses (
   id uuid primary key default gen_random_uuid(),
   expense_date date not null,
   category text not null,
-  cost_band text check (cost_band is null or cost_band in ('production', 'commercial', 'marketing', 'admin')),
+  cost_band text check (cost_band is null or cost_band in ('production', 'commercial', 'marketing', 'events', 'admin')),
   -- No "amount >= 0" check: the profit and loss sheet nets credits against a
   -- month's costs (a customer advance, a supplier refund), and those lines have
   -- to import as negative amounts for a month's expenses to add up to the same
@@ -332,10 +344,19 @@ begin
   if not exists (select 1 from pg_constraint where conname = 'expenses_source_ref_key') then
     alter table expenses add constraint expenses_source_ref_key unique (source_ref);
   end if;
-  if not exists (select 1 from pg_constraint where conname = 'expenses_cost_band_check') then
-    alter table expenses add constraint expenses_cost_band_check
-      check (cost_band is null or cost_band in ('production', 'commercial', 'marketing', 'admin'));
+end $$;
+
+-- Dropped and recreated unconditionally (not "if not exists"): the allowed
+-- band list has grown over time (e.g. adding 'events'), and a database that
+-- already has this constraint from an earlier version needs it replaced, not
+-- left as-is.
+do $$
+begin
+  if exists (select 1 from pg_constraint where conname = 'expenses_cost_band_check') then
+    alter table expenses drop constraint expenses_cost_band_check;
   end if;
+  alter table expenses add constraint expenses_cost_band_check
+    check (cost_band is null or cost_band in ('production', 'commercial', 'marketing', 'events', 'admin'));
 end $$;
 
 -- Drop the old fixed 11-value category check: expense_categories above is
@@ -375,7 +396,7 @@ from (values
   ('social-media-instagram-pub', 'Social Media – Instagram Pub', 'marketing'),
   ('website-maintenance', 'Website Maintenance', 'marketing'),
   ('website-hosting-shopify', 'Website Hosting (Shopify)', 'marketing'),
-  ('events-shows-exhibition', 'Events / Shows – Exhibition', 'marketing'),
+  ('events-shows-exhibition', 'Events / Shows – Exhibition', 'events'),
   ('communication-photo-shoot', 'Communication – Photo Shoot', 'marketing'),
   ('communication-look-book', 'Communication – Look Book', 'marketing'),
   ('marketing-promotional-bags', 'Marketing – Promotional Bags', 'marketing'),

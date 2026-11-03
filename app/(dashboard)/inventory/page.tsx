@@ -1,6 +1,6 @@
 import { getInventory, getStockUnits } from "@/lib/data/inventory";
-import { getAllSales, getSalesInRange } from "@/lib/data/sales";
-import { parseDateRangeParams, formatCurrency } from "@/lib/utils";
+import { getAllSales } from "@/lib/data/sales";
+import { formatCurrency } from "@/lib/utils";
 import { parseCurrencyParam } from "@/lib/currency";
 import { calculateInventoryValue, lowStockItems, findDeadStock } from "@/lib/calculations";
 import { Card } from "@/components/ui/Card";
@@ -26,13 +26,11 @@ export default async function InventoryPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const params = await searchParams;
-  const range = parseDateRangeParams(params);
   const currency = parseCurrencyParam(params);
-  const [inventoryRaw, stockUnits, allSales, salesInRange] = await Promise.all([
+  const [inventoryRaw, stockUnits, allSales] = await Promise.all([
     getInventory(),
     getStockUnits(),
     getAllSales(),
-    getSalesInRange(range),
   ]);
   const inventory = inventoryRaw.filter((row) => !DEMO_PRODUCT_NAMES.has(row.product_name));
 
@@ -47,12 +45,6 @@ export default async function InventoryPage({
   }
   const deadStock = findDeadStock(inventory, lastSaleDateByVariant, DEAD_STOCK_THRESHOLD_DAYS);
   const deadStockIds = new Set(deadStock.map((d) => d.variant_id));
-
-  const unitsSoldByVariant = new Map<string, number>();
-  for (const s of salesInRange) {
-    if (s.is_refund) continue;
-    unitsSoldByVariant.set(s.variant_id, (unitsSoldByVariant.get(s.variant_id) ?? 0) + s.quantity);
-  }
 
   // Where each variant's physical pieces currently sit — own warehouse (WHSE)
   // or a specific consignment boutique — so the Stock table can show exactly
@@ -100,7 +92,7 @@ export default async function InventoryPage({
       </div>
 
       <Card className="p-0">
-        <StockTable rows={stockRows} deadStockIds={deadStockIds} unitsSoldByVariant={unitsSoldByVariant} />
+        <StockTable rows={stockRows} deadStockIds={deadStockIds} />
       </Card>
     </div>
   );
