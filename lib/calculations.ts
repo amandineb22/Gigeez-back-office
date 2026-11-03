@@ -288,6 +288,24 @@ export function revenueByChannel(sales: SaleWithDetails[]): ChannelBreakdown[] {
   return Array.from(map.values()).sort((a, b) => b.revenue - a.revenue);
 }
 
+/**
+ * Same shape as revenueByChannel, grouped by reseller instead — "Direct" for
+ * a sale with no reseller attached. Revenue is already net of whatever the
+ * reseller keeps (see sales.reseller_id), so this compares what Gigeez
+ * actually nets through each one, not the retail price.
+ */
+export function revenueByReseller(sales: SaleWithDetails[]): ChannelBreakdown[] {
+  const map = new Map<string, ChannelBreakdown>();
+  for (const s of sales) {
+    const key = s.reseller_name ?? "Direct";
+    const row = map.get(key) ?? { channel: key, revenue: 0, profit: 0 };
+    row.revenue += s.revenue;
+    row.profit += s.profit;
+    map.set(key, row);
+  }
+  return Array.from(map.values()).sort((a, b) => b.revenue - a.revenue);
+}
+
 export interface CategoryBreakdown {
   category: string;
   revenue: number;

@@ -9,8 +9,7 @@ import {
   calculateSpreadsheetKpiSummary,
   financialMonthsInRange,
   shiftFinancialMonths,
-  revenueByChannel,
-  revenueByCategory,
+  revenueByReseller,
   bestAndWorstProducts,
   calculateInventoryValue,
   lowStockItems,
@@ -34,7 +33,6 @@ import { RevenueLineChart } from "@/components/charts/RevenueLineChart";
 import { ExpensePieChart } from "@/components/charts/ExpensePieChart";
 import { ProfitTrendChart } from "@/components/charts/ProfitTrendChart";
 import { ChannelBarChart } from "@/components/charts/ChannelBarChart";
-import { toTitleCase } from "@/lib/utils";
 
 export default async function DashboardHomePage({
   searchParams,
@@ -120,9 +118,12 @@ export default async function DashboardHomePage({
   const kpis = kpisFromSheet
     ? calculateSpreadsheetKpiSummary(fmCurrent, fmPrevious.length ? fmPrevious : null, fmYoy.length ? fmYoy : null)
     : calculateKpiSummary(salesCurrent, salesPrevious, salesYoy);
-  const channelData = revenueByChannel(salesCurrent);
-  const categoryData = revenueByCategory(salesCurrent);
-  const { best, worst } = bestAndWorstProducts(salesCurrent, 5);
+  // All-time, not scoped to the date range above — like the All-time card,
+  // because almost every individual sale on record (every historical piece
+  // the stock sheet imported as already sold) has no recorded date, so
+  // restricting these to the selected range left them empty in practice.
+  const resellerData = revenueByReseller(allTimeSales);
+  const { best, worst } = bestAndWorstProducts(allTimeSales, 5);
   const inventoryValue = calculateInventoryValue(inventory);
   const lowStock = lowStockItems(inventory);
 
@@ -157,12 +158,12 @@ export default async function DashboardHomePage({
   const expensePie = expensePieFromRows.length > 0 ? expensePieFromRows : expensePieFromSheet;
   const expensePieFromBands = expensePieFromRows.length === 0 && expensePieFromSheet.length > 0;
 
-  // Channel, category, refund rate and break-even can only come from
-  // individual sales, which the spreadsheet has no equivalent of. Say that,
-  // rather than "no sales", on a page that is otherwise showing revenue.
+  // Channel, category, and best/worst sellers can only come from individual
+  // sales, which the spreadsheet has no equivalent of. Say that, rather than
+  // "no sales", on a page that is otherwise showing revenue.
   const noPieceDataMessage = kpisFromSheet
     ? "Needs individual sales, which your profit and loss sheet doesn't break down."
-    : "No sales in this range yet.";
+    : "No sales recorded yet.";
 
   if (
     salesCurrent.length === 0 &&
@@ -319,45 +320,32 @@ export default async function DashboardHomePage({
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Revenue by channel</CardTitle>
+            <CardTitle>Revenue by reseller (all-time)</CardTitle>
           </CardHeader>
-          {channelData.length > 0 ? (
-            <ChannelBarChart data={channelData} />
+          <p className="-mt-4 mb-4 text-xs text-ink/40">
+            What Gigeez actually keeps per sale, compared across each reseller and &ldquo;Direct&rdquo; (Gigeez&rsquo;s
+            own sales).
+          </p>
+          {resellerData.length > 0 ? (
+            <ChannelBarChart data={resellerData} />
           ) : (
             <p className="py-10 text-center text-sm text-ink/40">{noPieceDataMessage}</p>
-          )}
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Revenue by category</CardTitle>
-          </CardHeader>
-          {categoryData.length === 0 ? (
-            <p className="py-10 text-center text-sm text-ink/40">{noPieceDataMessage}</p>
-          ) : (
-            <ul className="space-y-2.5">
-              {categoryData.map((c) => (
-                <li key={c.category} className="flex items-center justify-between text-sm">
-                  <span className="text-ink/70">{toTitleCase(c.category)}</span>
-                  <span className="font-medium text-ink">{formatCurrency(c.revenue, currency)}</span>
-                </li>
-              ))}
-            </ul>
           )}
         </Card>
         <Card className="space-y-6">
           <ProductPerformanceList
-            title="Best sellers"
+            title="Best sellers (all-time)"
             items={best}
-            emptyLabel="No sales in this range yet."
+            emptyLabel="No sales recorded yet."
             currency={currency}
           />
           <ProductPerformanceList
-            title="Worst sellers"
+            title="Worst sellers (all-time)"
             items={worst}
-            emptyLabel="No sales in this range yet."
+            emptyLabel="No sales recorded yet."
             currency={currency}
           />
         </Card>
