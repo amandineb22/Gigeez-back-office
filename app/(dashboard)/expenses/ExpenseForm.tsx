@@ -4,19 +4,23 @@ import { useActionState, useState } from "react";
 import { FormField, Input, Select, Textarea } from "@/components/ui/Field";
 import { Button } from "@/components/ui/Button";
 import type { FormState } from "@/lib/actions/expenses";
-import type { Expense } from "@/lib/types";
-import { EXPENSE_CATEGORIES } from "@/lib/types";
+import type { Expense, ExpenseCategory, ExpenseCategoryBand } from "@/lib/types";
+import { EXPENSE_CATEGORY_BANDS } from "@/lib/types";
 import { toTitleCase } from "@/lib/utils";
 import { BASE_CURRENCY, CURRENCIES, convertToBase, formatMoney, type Currency } from "@/lib/currency";
 
 const initialState: FormState = { error: null };
 
+const NEW_CATEGORY_VALUE = "__new__";
+
 export function ExpenseForm({
   action,
+  categories,
   defaultValues,
   submitLabel,
 }: {
   action: (prevState: FormState, formData: FormData) => Promise<FormState>;
+  categories: ExpenseCategory[];
   defaultValues?: Partial<Expense>;
   submitLabel: string;
 }) {
@@ -26,9 +30,24 @@ export function ExpenseForm({
   // preview below the field shows what will actually be saved.
   const [currency, setCurrency] = useState<Currency>(BASE_CURRENCY);
   const [amount, setAmount] = useState(String(defaultValues?.amount ?? ""));
+  const [category, setCategory] = useState(defaultValues?.category ?? "");
+  const isAddingCategory = category === NEW_CATEGORY_VALUE;
 
   const entered = Number(amount);
   const showsConversion = currency !== BASE_CURRENCY && Number.isFinite(entered) && amount.trim() !== "";
+
+  const categoriesByBand = EXPENSE_CATEGORY_BANDS.map((band) => ({
+    band,
+    options: categories.filter((c) => c.band === band),
+  })).filter((group) => group.options.length > 0);
+
+  // An expense can carry a category from before this list existed (or one
+  // since renamed). Without a matching <option>, a controlled <select> shows
+  // nothing selected while still holding that stale value — saving then
+  // fails ("that category no longer exists") with no visible cause. Surface
+  // it as its own option instead, so it's visible and explicitly replaceable.
+  const isKnownCategory = categories.some((c) => c.name === category);
+  const isLegacyCategory = category !== "" && category !== NEW_CATEGORY_VALUE && !isKnownCategory;
 
   return (
     <form action={formAction} className="max-w-xl space-y-5">
@@ -48,46 +67,68 @@ export function ExpenseForm({
           hint={showsConversion ? `Saves as ${formatMoney(convertToBase(entered, currency))}` : "Saved in QAR"}
         >
           <div className="flex gap-2">
-            <Input
-              id="amount"
-              name="amount"
-              type="number"
-              min={0}
-              step="0.01"
-              required
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              className="flex-1"
-            />
-            <Select
-              id="currency"
-              name="currency"
-              aria-label="Currency of the amount entered"
-              value={currency}
-              onChange={(e) => setCurrency(e.target.value as Currency)}
-              className="w-24 shrink-0"
-            >
-              {CURRENCIES.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </Select>
+            {/* Input/Select both set their own w-full internally, which a plain
+                className string can't reliably override (CSS rule order, not
+                prop order, decides the winner) — so the sizing goes on wrapper
+                divs instead, where there's nothing to conflict with. */}
+            <div className="min-w-0 flex-1">
+              <Input
+                id="amount"
+                name="amount"
+                type="number"
+                min={0}
+                step="0.01"
+                required
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+              />
+            </div>
+            <div className="w-24 shrink-0">
+              <Select
+                id="currency"
+                name="currency"
+                aria-label="Currency of the amount entered"
+                value={currency}
+                onChange={(e) => setCurrency(e.target.value as Currency)}
+              >
+                {CURRENCIES.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </Select>
+            </div>
           </div>
         </FormField>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <FormField label="Category" htmlFor="category">
-          <Select id="category" name="category" required defaultValue={defaultValues?.category ?? ""}>
+        <FormField
+          label="Category"
+          htmlFor="category"
+          hint={
+            isLegacyCategory
+              ? "This expense still has an old category — pick a real one and save to fix it."
+              : "Matches your profit and loss sheet's categories"
+          }
+        >
+          <Select id="category" name="category" required value={category} onChange={(e) => setCategory(e.target.value)}>
             <option value="" disabled>
               Select…
             </option>
-            {EXPENSE_CATEGORIES.map((c) => (
-              <option key={c} value={c}>
-                {toTitleCase(c)}
-              </option>
+            {isLegacyCategory && (
+              <option value={category}>{category} (old category — pick a real one)</option>
+            )}
+            {categoriesByBand.map(({ band, options }) => (
+              <optgroup key={band} label={toTitleCase(band)}>
+                {options.map((c) => (
+                  <option key={c.id} value={c.name}>
+                    {c.name}
+                  </option>
+                ))}
+              </optgroup>
             ))}
+            <option value={NEW_CATEGORY_VALUE}>+ Add a new category…</option>
           </Select>
         </FormField>
         <FormField label="Type" htmlFor="cost_type" hint="Fixed = recurs regardless of sales volume">
@@ -97,6 +138,26 @@ export function ExpenseForm({
           </Select>
         </FormField>
       </div>
+
+      {isAddingCategory && (
+        <div className="grid grid-cols-1 gap-4 rounded-lg border border-dashed border-ink/15 p-4 sm:grid-cols-2">
+          <FormField label="New category name" htmlFor="new_category_name">
+            <Input id="new_category_name" name="new_category_name" required placeholder="e.g. Studio Photography" />
+          </FormField>
+          <FormField label="Band" htmlFor="new_category_band" hint="Which group it belongs to on the P&L sheet">
+            <Select id="new_category_band" name="new_category_band" required defaultValue="">
+              <option value="" disabled>
+                Select…
+              </option>
+              {EXPENSE_CATEGORY_BANDS.map((band) => (
+                <option key={band} value={band}>
+                  {toTitleCase(band)}
+                </option>
+              ))}
+            </Select>
+          </FormField>
+        </div>
+      )}
 
       <FormField label="Vendor" htmlFor="vendor" hint="Optional">
         <Input id="vendor" name="vendor" defaultValue={defaultValues?.vendor ?? ""} />

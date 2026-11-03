@@ -68,6 +68,7 @@ interface ImportExpense {
   source_ref: string;
   expense_date: string;
   category: string;
+  cost_band: string;
   amount: number;
   cost_type: string;
   vendor: string | null;
@@ -143,16 +144,30 @@ async function main() {
     console.log(`${historic.length} historic years upserted into historic_years.`);
   }
 
-  // Individual expense lines from the sheet's four cost bands. Keyed by
+  // Individual expense lines from the sheet's own categories. Keyed by
   // source_ref so a re-import updates the same rows rather than adding a
   // second copy; anything entered by hand has a null source_ref and is never
   // touched here.
   const expenses = raw.expenses ?? [];
   if (expenses.length) {
+    // Make sure every category this snapshot uses exists in the governed
+    // list (expense_categories) before any expense row references it.
+    const categories = Array.from(new Map(expenses.map((e) => [e.category, e.cost_band])).entries()).map(
+      ([name, band]) => ({
+        name,
+        band: band as Database["public"]["Tables"]["expense_categories"]["Insert"]["band"],
+      })
+    );
+    const { error: categoriesError } = await supabase
+      .from("expense_categories")
+      .upsert(categories, { onConflict: "name" });
+    if (categoriesError) throw categoriesError;
+
     const rows: Database["public"]["Tables"]["expenses"]["Insert"][] = expenses.map((e) => ({
       source_ref: e.source_ref,
       expense_date: e.expense_date,
-      category: e.category as Database["public"]["Tables"]["expenses"]["Insert"]["category"],
+      category: e.category,
+      cost_band: e.cost_band as Database["public"]["Tables"]["expenses"]["Insert"]["cost_band"],
       amount: e.amount,
       cost_type: e.cost_type as Database["public"]["Tables"]["expenses"]["Insert"]["cost_type"],
       vendor: e.vendor,

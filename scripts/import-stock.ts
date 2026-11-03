@@ -38,6 +38,7 @@ interface ImportProduct {
   name: string;
   category: string;
   base_cost: number;
+  notes?: string | null;
 }
 
 interface ImportVariant {
@@ -87,7 +88,7 @@ interface ImportFile {
 const args = process.argv.slice(2);
 const force = args.includes("--force");
 const dataFileArg = args.find((a) => !a.startsWith("--"));
-const DATA_FILE = dataFileArg ?? join(__dirname, "../data/imports/2026-09-13-stock-import.json");
+const DATA_FILE = dataFileArg ?? join(__dirname, "../data/imports/2026-10-14-stock-import.json");
 
 function insertInBatches<T>(items: T[], size: number): T[][] {
   const batches: T[][] = [];

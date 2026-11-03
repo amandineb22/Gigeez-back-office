@@ -5,20 +5,20 @@
 
 export type Channel = "online" | "in-store" | "wholesale" | "pop-up" | "unknown";
 
+export type ResellerType = "consignment" | "wholesale";
+
 export type StockUnitStatus = "in_stock" | "sold";
 
-export type ExpenseCategory =
-  | "materials"
-  | "manufacturing"
-  | "shipping"
-  | "packaging"
-  | "marketing"
-  | "rent"
-  | "utilities"
-  | "salaries"
-  | "software"
-  | "travel"
-  | "other";
+/** The P&L sheet's own grouping — Production/Commercial/Marketing/Admin. */
+export type ExpenseCategoryBand = "production" | "commercial" | "marketing" | "admin";
+
+/** A row from the governed, extensible expense_categories list (see supabase/schema.sql). */
+export interface ExpenseCategory {
+  id: string;
+  name: string;
+  band: ExpenseCategoryBand;
+  created_at: string;
+}
 
 export type CostType = "fixed" | "variable";
 
@@ -104,6 +104,20 @@ export interface Supplier {
   updated_at: string;
 }
 
+export interface Reseller {
+  id: string;
+  name: string;
+  type: ResellerType;
+  currency: "QAR" | "EUR" | "USD";
+  /** Percentage of the retail/invoice price Gigeez actually keeps (100 for wholesale). */
+  gigeez_share_pct: number;
+  /** Stock-sheet bin name(s) this reseller corresponds to, for reference only. */
+  bin_locations: string[];
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Sale {
   id: string;
   /** Null means the sale date wasn't recorded (shown as "Unknown"). */
@@ -111,8 +125,13 @@ export interface Sale {
   variant_id: string;
   /** Optional link to the exact physical piece sold (stock_units). */
   stock_unit_id: string | null;
+  /** Null for a direct sale — Gigeez keeps 100% of unit_price. */
+  reseller_id: string | null;
   quantity: number;
+  /** What Gigeez actually receives per unit, in QAR — already net of any reseller cut. */
   unit_price: number;
+  /** Optional reference figure: what the end customer paid, in QAR. Never used in revenue/profit. */
+  retail_unit_price: number | null;
   channel: Channel;
   payment_method: string;
   discount: number;
@@ -128,6 +147,10 @@ export interface SaleWithDetails {
   sale_date: string | null;
   variant_id: string;
   stock_unit_id: string | null;
+  reseller_id: string | null;
+  /** Null for a direct sale. */
+  reseller_name: string | null;
+  reseller_type: ResellerType | null;
   sku: string;
   size: string;
   color: string;
@@ -141,6 +164,7 @@ export interface SaleWithDetails {
   sold_from: string | null;
   quantity: number;
   unit_price: number;
+  retail_unit_price: number | null;
   channel: Channel;
   payment_method: string;
   discount: number;
@@ -156,7 +180,10 @@ export interface SaleWithDetails {
 export interface Expense {
   id: string;
   expense_date: string;
-  category: ExpenseCategory;
+  /** Name of a row in expense_categories — free text so the list can grow, but always chosen from it. */
+  category: string;
+  /** The category's band at the time it was chosen; null for old rows from before this existed. */
+  cost_band: ExpenseCategoryBand | null;
   amount: number;
   cost_type: CostType;
   vendor: string | null;
@@ -233,19 +260,7 @@ export const CHANNELS: Channel[] = ["online", "in-store", "wholesale", "pop-up",
 /** Channels offered on the "Add sale" form — "unknown" is import-only and not a real choice going forward. */
 export const SALE_FORM_CHANNELS: Channel[] = ["online", "in-store", "wholesale", "pop-up"];
 
-export const EXPENSE_CATEGORIES: ExpenseCategory[] = [
-  "materials",
-  "manufacturing",
-  "shipping",
-  "packaging",
-  "marketing",
-  "rent",
-  "utilities",
-  "salaries",
-  "software",
-  "travel",
-  "other",
-];
+export const EXPENSE_CATEGORY_BANDS: ExpenseCategoryBand[] = ["production", "commercial", "marketing", "admin"];
 
 export const PAYMENT_METHODS = ["card", "cash", "bank transfer", "paypal", "other"];
 

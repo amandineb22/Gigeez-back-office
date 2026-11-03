@@ -11,6 +11,7 @@ export const NAV_ITEMS: NavItem[] = [
   { label: "Stock", href: "/inventory" },
   { label: "Purchase Orders", href: "/purchase-orders" },
   { label: "Suppliers", href: "/suppliers" },
+  { label: "Resellers", href: "/resellers" },
   { label: "Goals", href: "/goals" },
   { label: "Reports", href: "/reports" },
   { label: "Journal", href: "/journal" },

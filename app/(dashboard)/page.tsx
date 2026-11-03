@@ -1,17 +1,9 @@
 import { getSalesInRange, getAllSales, countUndatedSales } from "@/lib/data/sales";
 import { getExpensesInRange } from "@/lib/data/expenses";
 import { getInventory } from "@/lib/data/inventory";
-import { getReceivedPOsInRange } from "@/lib/data/purchaseOrders";
-import { getAllGoals } from "@/lib/data/goals";
 import { getFinancialMonths, getBpTargets, getHistoricYears } from "@/lib/data/financials";
 import { parseCurrencyParam } from "@/lib/currency";
-import {
-  parseDateRangeParams,
-  getPreviousPeriod,
-  getYoYPeriod,
-  formatCurrency,
-  formatPercent,
-} from "@/lib/utils";
+import { parseDateRangeParams, getPreviousPeriod, getYoYPeriod, formatCurrency } from "@/lib/utils";
 import {
   calculateKpiSummary,
   calculateSpreadsheetKpiSummary,
@@ -20,15 +12,10 @@ import {
   revenueByChannel,
   revenueByCategory,
   bestAndWorstProducts,
-  returnRefundRate,
-  calculateBreakEven,
   calculateInventoryValue,
   lowStockItems,
   buildProfitAndLoss,
-  reconstructInventoryValueOverTime,
   pickChartGrouping,
-  getGoalPeriodRange,
-  calculateGoalProgress,
   sumRevenue,
   sumProfit,
   countOrders,
@@ -40,14 +27,12 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { KpiCard } from "@/components/dashboard/KpiCard";
 import { ProductPerformanceList } from "@/components/dashboard/ProductPerformanceList";
-import { GoalProgressBar } from "@/components/dashboard/GoalProgressBar";
 import { FinancialsSection } from "@/components/dashboard/FinancialsSection";
 import { YearComparisonChart } from "@/components/charts/YearComparisonChart";
 import { UndatedSalesNotice } from "@/components/dashboard/UndatedSalesNotice";
 import { RevenueLineChart } from "@/components/charts/RevenueLineChart";
 import { ExpensePieChart } from "@/components/charts/ExpensePieChart";
 import { ProfitTrendChart } from "@/components/charts/ProfitTrendChart";
-import { InventoryValueChart } from "@/components/charts/InventoryValueChart";
 import { ChannelBarChart } from "@/components/charts/ChannelBarChart";
 import { toTitleCase } from "@/lib/utils";
 
@@ -69,8 +54,6 @@ export default async function DashboardHomePage({
     salesYoy,
     expensesCurrent,
     inventory,
-    receivedPOs,
-    goals,
     allTimeSales,
     financialMonths,
     bpTargets,
@@ -82,8 +65,6 @@ export default async function DashboardHomePage({
     getSalesInRange(yoyRange),
     getExpensesInRange(range),
     getInventory(),
-    getReceivedPOsInRange(range),
-    getAllGoals(),
     getAllSales(),
     getFinancialMonths(),
     getBpTargets(),
@@ -142,8 +123,6 @@ export default async function DashboardHomePage({
   const channelData = revenueByChannel(salesCurrent);
   const categoryData = revenueByCategory(salesCurrent);
   const { best, worst } = bestAndWorstProducts(salesCurrent, 5);
-  const refundRate = returnRefundRate(salesCurrent);
-  const breakEven = calculateBreakEven(salesCurrent, expensesCurrent);
   const inventoryValue = calculateInventoryValue(inventory);
   const lowStock = lowStockItems(inventory);
 
@@ -153,11 +132,14 @@ export default async function DashboardHomePage({
   const pnlRows = buildProfitAndLoss(salesCurrent, expensesCurrent, chartGrouping, fmCurrent);
   const revenueSeries = pnlRows.map((r) => ({ periodLabel: r.periodLabel, revenue: r.revenue, profit: r.grossProfit }));
   const profitSeries = pnlRows.map((r) => ({ periodLabel: r.periodLabel, netProfit: r.netProfit }));
-  const inventorySeries = reconstructInventoryValueOverTime(inventoryValue, salesCurrent, receivedPOs, grouping);
 
+  // Grouped by band (Production/Commercial/Marketing/Admin), not the specific
+  // category, so this stays readable even as the category list grows — the
+  // Expenses page itself is where the specific categories are broken out.
   const expensePieFromRows = Array.from(
     expensesCurrent.reduce((map, e) => {
-      map.set(e.category, (map.get(e.category) ?? 0) + e.amount);
+      const key = e.cost_band ?? "uncategorized";
+      map.set(key, (map.get(key) ?? 0) + e.amount);
       return map;
     }, new Map<string, number>())
   ).map(([category, amount]) => ({ category, amount }));
@@ -181,27 +163,6 @@ export default async function DashboardHomePage({
   const noPieceDataMessage = kpisFromSheet
     ? "Needs individual sales, which your profit and loss sheet doesn't break down."
     : "No sales in this range yet.";
-
-  const todayIso = new Date().toISOString().slice(0, 10);
-  const activeGoals = goals.filter((g) => {
-    const r = getGoalPeriodRange(g);
-    return r.from <= todayIso && todayIso <= r.to;
-  });
-  const goalProgresses = await Promise.all(
-    activeGoals.map(async (goal) => {
-      const goalRange = getGoalPeriodRange(goal);
-      const goalSales = await getSalesInRange(goalRange);
-      const actual =
-        goal.metric_type === "revenue"
-          ? sumRevenue(goalSales)
-          : goal.metric_type === "profit"
-            ? sumProfit(goalSales)
-            : goal.metric_type === "orders"
-              ? countOrders(goalSales)
-              : averageOrderValue(goalSales);
-      return { goal, progress: calculateGoalProgress(goal, actual) };
-    })
-  );
 
   if (
     salesCurrent.length === 0 &&
@@ -311,37 +272,15 @@ export default async function DashboardHomePage({
 
       <UndatedSalesNotice undatedSalesCount={undatedSalesCount} />
 
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
-        <Card>
-          <p className="text-xs font-medium uppercase tracking-wide text-ink/40">Refund rate</p>
-          <p className="mt-2 font-display text-2xl text-ink">{formatPercent(refundRate)}</p>
-          {kpisFromSheet && (
-            <p className="mt-1 text-xs text-ink/40">From individual sales, which are still incomplete.</p>
-          )}
-        </Card>
-        <Card>
-          <p className="text-xs font-medium uppercase tracking-wide text-ink/40">Break-even point</p>
-          <p className="mt-2 font-display text-2xl text-ink">
-            {breakEven.breakEvenUnits ? `${Math.ceil(breakEven.breakEvenUnits)} units` : "—"}
-          </p>
-          <p className="mt-1 text-xs text-ink/40">
-            {breakEven.breakEvenRevenue
-              ? formatCurrency(breakEven.breakEvenRevenue, currency)
-              : kpisFromSheet
-                ? "Needs a per-dress margin, which the sheet doesn't break down."
-                : "Not reachable at current margins"}
-          </p>
-        </Card>
-        <Card>
-          <p className="text-xs font-medium uppercase tracking-wide text-ink/40">Inventory value</p>
-          <p className="mt-2 font-display text-2xl text-ink">{formatCurrency(inventoryValue, currency)}</p>
-          <p className="mt-1 text-xs text-ink/40">
-            {lowStock.length} SKU{lowStock.length === 1 ? "" : "s"} low on stock
-          </p>
-        </Card>
-      </div>
+      <Card>
+        <p className="text-xs font-medium uppercase tracking-wide text-ink/40">Inventory value</p>
+        <p className="mt-2 font-display text-2xl text-ink">{formatCurrency(inventoryValue, currency)}</p>
+        <p className="mt-1 text-xs text-ink/40">
+          {lowStock.length} SKU{lowStock.length === 1 ? "" : "s"} low on stock
+        </p>
+      </Card>
 
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
         <Card>
           <CardHeader>
             <CardTitle>Revenue over time</CardTitle>
@@ -374,16 +313,6 @@ export default async function DashboardHomePage({
           </CardHeader>
           {profitSeries.length > 0 ? (
             <ProfitTrendChart data={profitSeries} />
-          ) : (
-            <p className="py-16 text-center text-sm text-ink/40">Not enough data yet.</p>
-          )}
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Inventory value over time</CardTitle>
-          </CardHeader>
-          {inventorySeries.length > 0 ? (
-            <InventoryValueChart data={inventorySeries} />
           ) : (
             <p className="py-16 text-center text-sm text-ink/40">Not enough data yet.</p>
           )}
@@ -433,24 +362,6 @@ export default async function DashboardHomePage({
           />
         </Card>
       </div>
-
-      {goalProgresses.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Goals this period</CardTitle>
-          </CardHeader>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
-            {goalProgresses.map(({ goal, progress }) => (
-              <GoalProgressBar
-                key={goal.id}
-                title={`${toTitleCase(goal.metric_type)} · ${toTitleCase(goal.period_type)}`}
-                progress={progress}
-                currency={currency}
-              />
-            ))}
-          </div>
-        </Card>
-      )}
     </div>
   );
 }

@@ -66,8 +66,9 @@ export function SalesTable({
               <Th>SKU</Th>
               <Th>Qty</Th>
               <Th>Unit price</Th>
+              <Th>Reseller</Th>
               <Th>Channel</Th>
-              <Th>Revenue</Th>
+              <Th>Revenue (Gigeez's take)</Th>
               <Th>Profit</Th>
               <Th />
             </tr>
@@ -98,6 +99,13 @@ export function SalesTable({
                   <Td>{s.quantity}</Td>
                   <Td>{formatCurrency(s.unit_price, currency)}</Td>
                   <Td>
+                    {s.reseller_name ? (
+                      <Badge variant={s.reseller_type === "wholesale" ? "brand" : "neutral"}>{s.reseller_name}</Badge>
+                    ) : (
+                      <span className="text-ink/40">Direct</span>
+                    )}
+                  </Td>
+                  <Td>
                     {s.channel === "unknown" ? (
                       <Badge variant="neutral" title="No sale channel was recorded for this piece">
                         Unknown
@@ -111,7 +119,9 @@ export function SalesTable({
                       </Badge>
                     )}
                   </Td>
-                  <Td className={cn("font-medium", s.revenue < 0 ? "text-red-600" : "text-ink")}>{formatCurrency(s.revenue, currency)}</Td>
+                  <Td className={cn("font-medium", s.revenue < 0 ? "text-red-600" : "text-ink")}>
+                    {formatCurrency(s.revenue, currency)}
+                  </Td>
                   <Td className={cn("font-medium", s.profit < 0 ? "text-red-600" : "text-emerald-700")}>{formatCurrency(s.profit, currency)}</Td>
                   <Td>
                     <div className="flex items-center justify-end gap-1">

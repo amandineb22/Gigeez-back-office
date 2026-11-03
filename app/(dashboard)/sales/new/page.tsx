@@ -1,10 +1,11 @@
 import { getAllVariantsWithProduct } from "@/lib/data/variants";
+import { getAllResellers } from "@/lib/data/resellers";
 import { createSale } from "@/lib/actions/sales";
 import { SaleForm } from "../SaleForm";
 import { EmptyState } from "@/components/ui/EmptyState";
 
 export default async function NewSalePage() {
-  const variants = await getAllVariantsWithProduct();
+  const [variants, resellers] = await Promise.all([getAllVariantsWithProduct(), getAllResellers()]);
 
   if (variants.length === 0) {
     return (
@@ -20,7 +21,7 @@ export default async function NewSalePage() {
   return (
     <div>
       <h1 className="mb-6 font-display text-2xl text-ink">Add sale</h1>
-      <SaleForm action={createSale} variants={variants} submitLabel="Add sale" />
+      <SaleForm action={createSale} variants={variants} resellers={resellers} submitLabel="Add sale" />
     </div>
   );
 }
