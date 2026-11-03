@@ -119,3 +119,11 @@ from (values
   ('accounting-for-taxes', 'Accounting For Taxes', 'admin')
 ) as v(slug, name, band)
 where e.source_ref like '%:' || v.slug;
+
+-- ----------------------------------------------------------------------------
+-- Row level security, matching every other table: signed-in users only.
+-- ----------------------------------------------------------------------------
+alter table expense_categories enable row level security;
+
+drop policy if exists "authenticated full access" on expense_categories;
+create policy "authenticated full access" on expense_categories for all to authenticated using (true) with check (true);
