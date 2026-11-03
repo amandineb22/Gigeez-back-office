@@ -38,6 +38,7 @@ interface ImportProduct {
   name: string;
   category: string;
   base_cost: number;
+  notes?: string | null;
 }
 
 interface ImportVariant {

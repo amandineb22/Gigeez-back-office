@@ -142,9 +142,11 @@ export function FinancialsSection({
       </div>
 
       {rows.length > 0 && (
-        <div className="mt-6">
-          <p className="mb-3 text-sm font-medium text-ink/60">Month by month</p>
-          <Table>
+        <details className="mt-6">
+          <summary className="cursor-pointer select-none text-sm font-medium text-ink/60 hover:text-ink">
+            Month by month
+          </summary>
+          <Table className="mt-3">
             <Thead>
               <tr>
                 <Th>Month</Th>
@@ -199,7 +201,7 @@ export function FinancialsSection({
               </Tr>
             </tbody>
           </Table>
-        </div>
+        </details>
       )}
     </Card>
   );
