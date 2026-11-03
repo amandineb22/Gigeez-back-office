@@ -10,7 +10,6 @@ import {
   financialMonthsInRange,
   shiftFinancialMonths,
   revenueByChannel,
-  revenueByCategory,
   bestAndWorstProducts,
   calculateInventoryValue,
   lowStockItems,
@@ -34,7 +33,6 @@ import { RevenueLineChart } from "@/components/charts/RevenueLineChart";
 import { ExpensePieChart } from "@/components/charts/ExpensePieChart";
 import { ProfitTrendChart } from "@/components/charts/ProfitTrendChart";
 import { ChannelBarChart } from "@/components/charts/ChannelBarChart";
-import { toTitleCase } from "@/lib/utils";
 
 export default async function DashboardHomePage({
   searchParams,
@@ -125,7 +123,6 @@ export default async function DashboardHomePage({
   // the stock sheet imported as already sold) has no recorded date, so
   // restricting these to the selected range left them empty in practice.
   const channelData = revenueByChannel(allTimeSales);
-  const categoryData = revenueByCategory(allTimeSales);
   const { best, worst } = bestAndWorstProducts(allTimeSales, 5);
   const inventoryValue = calculateInventoryValue(inventory);
   const lowStock = lowStockItems(inventory);
@@ -323,7 +320,7 @@ export default async function DashboardHomePage({
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle>Revenue by channel (all-time)</CardTitle>
@@ -332,23 +329,6 @@ export default async function DashboardHomePage({
             <ChannelBarChart data={channelData} />
           ) : (
             <p className="py-10 text-center text-sm text-ink/40">{noPieceDataMessage}</p>
-          )}
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Revenue by category (all-time)</CardTitle>
-          </CardHeader>
-          {categoryData.length === 0 ? (
-            <p className="py-10 text-center text-sm text-ink/40">{noPieceDataMessage}</p>
-          ) : (
-            <ul className="space-y-2.5">
-              {categoryData.map((c) => (
-                <li key={c.category} className="flex items-center justify-between text-sm">
-                  <span className="text-ink/70">{toTitleCase(c.category)}</span>
-                  <span className="font-medium text-ink">{formatCurrency(c.revenue, currency)}</span>
-                </li>
-              ))}
-            </ul>
           )}
         </Card>
         <Card className="space-y-6">
