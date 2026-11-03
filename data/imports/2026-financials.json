@@ -1120,7 +1120,7 @@
       "cost_type": "variable",
       "vendor": null,
       "notes": "EVENTS / SHOWS EXHIBITION \u00b7 from the profit and loss sheet (marketing)",
-      "cost_band": "marketing"
+      "cost_band": "events"
     },
     {
       "source_ref": "pnl:2026-01-01:events-shows-exhibition",
@@ -1130,7 +1130,7 @@
       "cost_type": "variable",
       "vendor": null,
       "notes": "EVENTS / SHOWS EXHIBITION \u00b7 from the profit and loss sheet (marketing)",
-      "cost_band": "marketing"
+      "cost_band": "events"
     },
     {
       "source_ref": "pnl:2026-04-01:events-shows-exhibition",
@@ -1140,7 +1140,7 @@
       "cost_type": "variable",
       "vendor": null,
       "notes": "EVENTS / SHOWS EXHIBITION \u00b7 from the profit and loss sheet (marketing)",
-      "cost_band": "marketing"
+      "cost_band": "events"
     },
     {
       "source_ref": "pnl:2026-05-01:events-shows-exhibition",
@@ -1150,7 +1150,7 @@
       "cost_type": "variable",
       "vendor": null,
       "notes": "EVENTS / SHOWS EXHIBITION \u00b7 from the profit and loss sheet (marketing)",
-      "cost_band": "marketing"
+      "cost_band": "events"
     },
     {
       "source_ref": "pnl:2026-06-01:events-shows-exhibition",
@@ -1160,7 +1160,7 @@
       "cost_type": "variable",
       "vendor": null,
       "notes": "EVENTS / SHOWS EXHIBITION \u00b7 from the profit and loss sheet (marketing)",
-      "cost_band": "marketing"
+      "cost_band": "events"
     },
     {
       "source_ref": "pnl:2026-07-01:events-shows-exhibition",
@@ -1170,7 +1170,7 @@
       "cost_type": "variable",
       "vendor": null,
       "notes": "EVENTS / SHOWS EXHIBITION \u00b7 from the profit and loss sheet (marketing)",
-      "cost_band": "marketing"
+      "cost_band": "events"
     },
     {
       "source_ref": "pnl:2026-08-01:events-shows-exhibition",
@@ -1180,7 +1180,7 @@
       "cost_type": "variable",
       "vendor": null,
       "notes": "EVENTS / SHOWS EXHIBITION \u00b7 from the profit and loss sheet (marketing)",
-      "cost_band": "marketing"
+      "cost_band": "events"
     },
     {
       "source_ref": "pnl:2025-05-01:communication-photo-shoot",
