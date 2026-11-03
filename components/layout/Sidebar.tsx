@@ -5,9 +5,10 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { theme } from "@/theme/config";
 import { cn } from "@/lib/utils";
+import { signOut } from "@/lib/actions/auth";
 import { NAV_ITEMS } from "./nav";
 
-export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
+export function Sidebar({ userEmail, onNavigate }: { userEmail: string; onNavigate?: () => void }) {
   const pathname = usePathname();
   // Carry the global filters (date range, display currency) across navigation,
   // so picking EUR on the dashboard doesn't silently revert to QAR on Sales.
@@ -51,7 +52,20 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         })}
       </nav>
 
-      <div className="px-6 py-5 text-xs text-ink/30">Internal use only</div>
+      {/* Pinned to the bottom of the sidebar, which is itself pinned to the
+          viewport (see AppShell) — stays visible regardless of scroll. */}
+      <div className="space-y-3 border-t border-ink/5 px-6 py-5">
+        <p className="truncate text-xs text-ink/50">{userEmail}</p>
+        <form action={signOut}>
+          <button
+            type="submit"
+            className="w-full rounded-full border border-ink/10 px-3 py-1.5 text-xs font-medium text-ink/60 transition-editorial hover:bg-paper"
+          >
+            Sign out
+          </button>
+        </form>
+        <p className="text-xs text-ink/30">Internal use only</p>
+      </div>
     </div>
   );
 }
