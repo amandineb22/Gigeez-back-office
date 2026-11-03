@@ -9,7 +9,7 @@ import {
   calculateSpreadsheetKpiSummary,
   financialMonthsInRange,
   shiftFinancialMonths,
-  revenueByChannel,
+  revenueByReseller,
   bestAndWorstProducts,
   calculateInventoryValue,
   lowStockItems,
@@ -122,7 +122,7 @@ export default async function DashboardHomePage({
   // because almost every individual sale on record (every historical piece
   // the stock sheet imported as already sold) has no recorded date, so
   // restricting these to the selected range left them empty in practice.
-  const channelData = revenueByChannel(allTimeSales);
+  const resellerData = revenueByReseller(allTimeSales);
   const { best, worst } = bestAndWorstProducts(allTimeSales, 5);
   const inventoryValue = calculateInventoryValue(inventory);
   const lowStock = lowStockItems(inventory);
@@ -323,10 +323,14 @@ export default async function DashboardHomePage({
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Revenue by channel (all-time)</CardTitle>
+            <CardTitle>Revenue by reseller (all-time)</CardTitle>
           </CardHeader>
-          {channelData.length > 0 ? (
-            <ChannelBarChart data={channelData} />
+          <p className="-mt-4 mb-4 text-xs text-ink/40">
+            What Gigeez actually keeps per sale, compared across each reseller and &ldquo;Direct&rdquo; (Gigeez&rsquo;s
+            own sales).
+          </p>
+          {resellerData.length > 0 ? (
+            <ChannelBarChart data={resellerData} />
           ) : (
             <p className="py-10 text-center text-sm text-ink/40">{noPieceDataMessage}</p>
           )}
