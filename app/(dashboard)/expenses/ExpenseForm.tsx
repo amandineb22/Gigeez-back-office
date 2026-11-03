@@ -41,6 +41,14 @@ export function ExpenseForm({
     options: categories.filter((c) => c.band === band),
   })).filter((group) => group.options.length > 0);
 
+  // An expense can carry a category from before this list existed (or one
+  // since renamed). Without a matching <option>, a controlled <select> shows
+  // nothing selected while still holding that stale value — saving then
+  // fails ("that category no longer exists") with no visible cause. Surface
+  // it as its own option instead, so it's visible and explicitly replaceable.
+  const isKnownCategory = categories.some((c) => c.name === category);
+  const isLegacyCategory = category !== "" && category !== NEW_CATEGORY_VALUE && !isKnownCategory;
+
   return (
     <form action={formAction} className="max-w-xl space-y-5">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -89,11 +97,22 @@ export function ExpenseForm({
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <FormField label="Category" htmlFor="category" hint="Matches your profit and loss sheet's categories">
+        <FormField
+          label="Category"
+          htmlFor="category"
+          hint={
+            isLegacyCategory
+              ? "This expense still has an old category — pick a real one and save to fix it."
+              : "Matches your profit and loss sheet's categories"
+          }
+        >
           <Select id="category" name="category" required value={category} onChange={(e) => setCategory(e.target.value)}>
             <option value="" disabled>
               Select…
             </option>
+            {isLegacyCategory && (
+              <option value={category}>{category} (old category — pick a real one)</option>
+            )}
             {categoriesByBand.map(({ band, options }) => (
               <optgroup key={band} label={toTitleCase(band)}>
                 {options.map((c) => (
