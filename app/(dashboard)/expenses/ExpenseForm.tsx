@@ -67,31 +67,37 @@ export function ExpenseForm({
           hint={showsConversion ? `Saves as ${formatMoney(convertToBase(entered, currency))}` : "Saved in QAR"}
         >
           <div className="flex gap-2">
-            <Input
-              id="amount"
-              name="amount"
-              type="number"
-              min={0}
-              step="0.01"
-              required
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              className="flex-1"
-            />
-            <Select
-              id="currency"
-              name="currency"
-              aria-label="Currency of the amount entered"
-              value={currency}
-              onChange={(e) => setCurrency(e.target.value as Currency)}
-              className="w-24 shrink-0"
-            >
-              {CURRENCIES.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </Select>
+            {/* Input/Select both set their own w-full internally, which a plain
+                className string can't reliably override (CSS rule order, not
+                prop order, decides the winner) — so the sizing goes on wrapper
+                divs instead, where there's nothing to conflict with. */}
+            <div className="min-w-0 flex-1">
+              <Input
+                id="amount"
+                name="amount"
+                type="number"
+                min={0}
+                step="0.01"
+                required
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+              />
+            </div>
+            <div className="w-24 shrink-0">
+              <Select
+                id="currency"
+                name="currency"
+                aria-label="Currency of the amount entered"
+                value={currency}
+                onChange={(e) => setCurrency(e.target.value as Currency)}
+              >
+                {CURRENCIES.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </Select>
+            </div>
           </div>
         </FormField>
       </div>
