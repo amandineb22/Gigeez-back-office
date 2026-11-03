@@ -160,6 +160,24 @@ If the project already exists and you only need these additions, paste
 Editor instead of re-running the whole schema — it's the same statements on
 their own, and safe to run more than once.
 
+## 5f. Expense categories
+
+Expense categories match the profit and loss sheet's own line items exactly
+(34 of them, e.g. "Textile Saree Purchase", "Retailer – Commission Sales"),
+grouped under its 4 bands (Production/Commercial/Marketing/Admin) — not a
+short generic list. They live in their own `expense_categories` table rather
+than a fixed set, so "Add expense" can add a new one on the fly (the field is
+still always picked from the list, never free text) without a schema change.
+The Expenses page filters by category, and the dashboard's expense breakdown
+chart groups by band so it stays readable as the list grows.
+
+If the project already exists, paste
+[`supabase/add-expense-categories.sql`](supabase/add-expense-categories.sql)
+into the SQL Editor instead of re-running the whole schema. It also relabels
+any expenses already imported from the P&L sheet to their exact category
+(matched by the slug already saved in their `source_ref`); hand-entered
+expenses are never touched. Safe to run more than once.
+
 ## 5c. Removing the sample data
 
 If you ran `npm run seed` earlier and now want the placeholder products,
@@ -233,6 +251,7 @@ components/
 theme/config.ts           Brand colors, font names, logo — see Rebranding
 supabase/schema.sql       Full schema, views, RLS policies
 supabase/add-resellers.sql  The reseller directory + sales columns, standalone
+supabase/add-expense-categories.sql  The expense category list, standalone
 supabase/reset-stock-data.sql  Wipes products/variants/stock/sales for a fresh re-import
 supabase/cleanup-demo-data.sql  Deletes the sample data from npm run seed
 scripts/seed.ts           Sample data generator

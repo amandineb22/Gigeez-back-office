@@ -9,18 +9,16 @@ export type ResellerType = "consignment" | "wholesale";
 
 export type StockUnitStatus = "in_stock" | "sold";
 
-export type ExpenseCategory =
-  | "materials"
-  | "manufacturing"
-  | "shipping"
-  | "packaging"
-  | "marketing"
-  | "rent"
-  | "utilities"
-  | "salaries"
-  | "software"
-  | "travel"
-  | "other";
+/** The P&L sheet's own grouping — Production/Commercial/Marketing/Admin. */
+export type ExpenseCategoryBand = "production" | "commercial" | "marketing" | "admin";
+
+/** A row from the governed, extensible expense_categories list (see supabase/schema.sql). */
+export interface ExpenseCategory {
+  id: string;
+  name: string;
+  band: ExpenseCategoryBand;
+  created_at: string;
+}
 
 export type CostType = "fixed" | "variable";
 
@@ -182,7 +180,10 @@ export interface SaleWithDetails {
 export interface Expense {
   id: string;
   expense_date: string;
-  category: ExpenseCategory;
+  /** Name of a row in expense_categories — free text so the list can grow, but always chosen from it. */
+  category: string;
+  /** The category's band at the time it was chosen; null for old rows from before this existed. */
+  cost_band: ExpenseCategoryBand | null;
   amount: number;
   cost_type: CostType;
   vendor: string | null;
@@ -259,19 +260,7 @@ export const CHANNELS: Channel[] = ["online", "in-store", "wholesale", "pop-up",
 /** Channels offered on the "Add sale" form — "unknown" is import-only and not a real choice going forward. */
 export const SALE_FORM_CHANNELS: Channel[] = ["online", "in-store", "wholesale", "pop-up"];
 
-export const EXPENSE_CATEGORIES: ExpenseCategory[] = [
-  "materials",
-  "manufacturing",
-  "shipping",
-  "packaging",
-  "marketing",
-  "rent",
-  "utilities",
-  "salaries",
-  "software",
-  "travel",
-  "other",
-];
+export const EXPENSE_CATEGORY_BANDS: ExpenseCategoryBand[] = ["production", "commercial", "marketing", "admin"];
 
 export const PAYMENT_METHODS = ["card", "cash", "bank transfer", "paypal", "other"];
 

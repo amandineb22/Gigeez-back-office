@@ -11,6 +11,7 @@ export async function GET(request: NextRequest) {
   const csv = toCsv<Expense>(expenses, [
     { header: "Date", accessor: (e) => e.expense_date },
     { header: "Category", accessor: (e) => e.category },
+    { header: "Band", accessor: (e) => e.cost_band ?? "" },
     { header: "Type", accessor: (e) => e.cost_type },
     { header: "Vendor", accessor: (e) => e.vendor ?? "" },
     { header: "Amount", accessor: (e) => e.amount.toFixed(2) },

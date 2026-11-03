@@ -133,9 +133,13 @@ export default async function DashboardHomePage({
   const revenueSeries = pnlRows.map((r) => ({ periodLabel: r.periodLabel, revenue: r.revenue, profit: r.grossProfit }));
   const profitSeries = pnlRows.map((r) => ({ periodLabel: r.periodLabel, netProfit: r.netProfit }));
 
+  // Grouped by band (Production/Commercial/Marketing/Admin), not the specific
+  // category, so this stays readable even as the category list grows — the
+  // Expenses page itself is where the specific categories are broken out.
   const expensePieFromRows = Array.from(
     expensesCurrent.reduce((map, e) => {
-      map.set(e.category, (map.get(e.category) ?? 0) + e.amount);
+      const key = e.cost_band ?? "uncategorized";
+      map.set(key, (map.get(key) ?? 0) + e.amount);
       return map;
     }, new Map<string, number>())
   ).map(([category, amount]) => ({ category, amount }));

@@ -241,17 +241,71 @@ create index if not exists sales_sale_date_idx on sales (sale_date);
 create index if not exists sales_channel_idx on sales (channel);
 
 -- ----------------------------------------------------------------------------
+-- 4b. expense_categories — the governed, extensible category list, matching
+-- the profit and loss sheet's own line items and grouped under its 4 bands
+-- (Production/Commercial/Marketing/Admin). expenses.category stores the name
+-- as plain text rather than a foreign key, so an old database can still read
+-- any expense row even before this table exists; the "Add expense" form
+-- reads from this table and can add to it, but never writes free text.
+-- ----------------------------------------------------------------------------
+create table if not exists expense_categories (
+  id uuid primary key default gen_random_uuid(),
+  name text not null unique,
+  band text not null check (band in ('production', 'commercial', 'marketing', 'admin')),
+  created_at timestamptz not null default now()
+);
+
+insert into expense_categories (name, band) values
+  ('Textile Saree Purchase', 'production'),
+  ('Textile Silk For Slip Dress Purchase', 'production'),
+  ('Jewelry Purchase', 'production'),
+  ('Material Shipping Cost (DHL)', 'production'),
+  ('Tailor Cost', 'production'),
+  ('Tailor / Samples Making Cost', 'production'),
+  ('Tags Purchase', 'production'),
+  ('Label Purchase', 'production'),
+  ('Travel – India', 'production'),
+  ('Material – Charm', 'production'),
+  ('Material – Pearls', 'production'),
+  ('Consumables – Al Rawnaq', 'production'),
+  ('Technical Support (Zentinel/Fievr/Vibes)', 'production'),
+  ('Printing – AST Print', 'production'),
+  ('Advance Payment From Customer', 'production'),
+  ('Retailer – Discount', 'commercial'),
+  ('Retailer – Commission Sales', 'commercial'),
+  ('Shipping Cost', 'commercial'),
+  ('Gift Dresses Cost', 'commercial'),
+  ('Traveling – Plane Cost', 'commercial'),
+  ('Traveling – Uber Cost', 'commercial'),
+  ('Social Media – Intern', 'marketing'),
+  ('Social Media – Instagram Pub', 'marketing'),
+  ('Website Maintenance', 'marketing'),
+  ('Website Hosting (Shopify)', 'marketing'),
+  ('Events / Shows – Exhibition', 'marketing'),
+  ('Communication – Photo Shoot', 'marketing'),
+  ('Communication – Look Book', 'marketing'),
+  ('Marketing – Promotional Bags', 'marketing'),
+  ('Bank Expenses', 'admin'),
+  ('Government Fees', 'admin'),
+  ('Charity Foundation', 'admin'),
+  ('Mega – Image Stock', 'admin'),
+  ('Salary', 'admin'),
+  ('Accounting For Taxes', 'admin')
+on conflict (name) do update set band = excluded.band;
+
+-- ----------------------------------------------------------------------------
 -- 5. expenses — one row per expense line
+--
+-- category is free text rather than a fixed check constraint, so the list in
+-- expense_categories above can grow without a schema change; cost_band
+-- mirrors the category's band at the time it was chosen, so the dashboard's
+-- expense breakdown can group by band without a join.
 -- ----------------------------------------------------------------------------
 create table if not exists expenses (
   id uuid primary key default gen_random_uuid(),
   expense_date date not null,
-  category text not null check (
-    category in (
-      'materials', 'manufacturing', 'shipping', 'packaging', 'marketing',
-      'rent', 'utilities', 'salaries', 'software', 'travel', 'other'
-    )
-  ),
+  category text not null,
+  cost_band text check (cost_band is null or cost_band in ('production', 'commercial', 'marketing', 'admin')),
   -- No "amount >= 0" check: the profit and loss sheet nets credits against a
   -- month's costs (a customer advance, a supplier refund), and those lines have
   -- to import as negative amounts for a month's expenses to add up to the same
@@ -270,31 +324,68 @@ create table if not exists expenses (
   updated_at timestamptz not null default now()
 );
 
--- Backfill for databases created before source_ref existed.
+-- Backfill for databases created before source_ref/cost_band existed.
 alter table expenses add column if not exists source_ref text;
+alter table expenses add column if not exists cost_band text;
 do $$
 begin
   if not exists (select 1 from pg_constraint where conname = 'expenses_source_ref_key') then
     alter table expenses add constraint expenses_source_ref_key unique (source_ref);
   end if;
+  if not exists (select 1 from pg_constraint where conname = 'expenses_cost_band_check') then
+    alter table expenses add constraint expenses_cost_band_check
+      check (cost_band is null or cost_band in ('production', 'commercial', 'marketing', 'admin'));
+  end if;
 end $$;
 
--- Backfill for databases created before "travel" was a category: on an
--- existing table the "create table if not exists" above is a no-op, so the
--- check constraint has to be replaced explicitly.
+-- Drop the old fixed 11-value category check: expense_categories above is
+-- now the source of truth, and it can grow without a migration.
 do $$
 begin
   if exists (select 1 from pg_constraint where conname = 'expenses_category_check') then
     alter table expenses drop constraint expenses_category_check;
   end if;
-  alter table expenses add constraint expenses_category_check
-    check (
-      category in (
-        'materials', 'manufacturing', 'shipping', 'packaging', 'marketing',
-        'rent', 'utilities', 'salaries', 'software', 'travel', 'other'
-      )
-    );
 end $$;
+
+-- Relabel expenses already imported from the P&L sheet to the exact category
+-- above, matched by the slug already saved in their source_ref
+-- (e.g. 'pnl:2025-09-01:textile-saree-purchase'). Hand-entered expenses have
+-- no source_ref and are never touched. No-op on a fresh database.
+update expenses e
+set category = v.name, cost_band = v.band
+from (values
+  ('textile-saree-purchase', 'Textile Saree Purchase', 'production'),
+  ('textile-silk-for-slip-dress-purchase', 'Textile Silk For Slip Dress Purchase', 'production'),
+  ('jewelry-purchase', 'Jewelry Purchase', 'production'),
+  ('material-shipping-cost-dhl', 'Material Shipping Cost (DHL)', 'production'),
+  ('tailor-cost', 'Tailor Cost', 'production'),
+  ('tailor-samples-making-cost', 'Tailor / Samples Making Cost', 'production'),
+  ('material-charm', 'Material – Charm', 'production'),
+  ('material-pearls', 'Material – Pearls', 'production'),
+  ('consumables-al-rawnaq', 'Consumables – Al Rawnaq', 'production'),
+  ('technical-support-zentinel-fievr-vibes', 'Technical Support (Zentinel/Fievr/Vibes)', 'production'),
+  ('printing-ast-print', 'Printing – AST Print', 'production'),
+  ('advance-payment-from-customer', 'Advance Payment From Customer', 'production'),
+  ('retailer-comission-sales', 'Retailer – Commission Sales', 'commercial'),
+  ('shipping-cost', 'Shipping Cost', 'commercial'),
+  ('gift-dresses-cost', 'Gift Dresses Cost', 'commercial'),
+  ('traveling-plane-cost', 'Traveling – Plane Cost', 'commercial'),
+  ('traveling-ubercost', 'Traveling – Uber Cost', 'commercial'),
+  ('social-media-intern', 'Social Media – Intern', 'marketing'),
+  ('social-media-instagram-pub', 'Social Media – Instagram Pub', 'marketing'),
+  ('website-maintenance', 'Website Maintenance', 'marketing'),
+  ('website-hosting-shopify', 'Website Hosting (Shopify)', 'marketing'),
+  ('events-shows-exhibition', 'Events / Shows – Exhibition', 'marketing'),
+  ('communication-photo-shoot', 'Communication – Photo Shoot', 'marketing'),
+  ('communication-look-book', 'Communication – Look Book', 'marketing'),
+  ('marketing-promotional-bags', 'Marketing – Promotional Bags', 'marketing'),
+  ('government-fees', 'Government Fees', 'admin'),
+  ('charity-foundation', 'Charity Foundation', 'admin'),
+  ('mega-image-stock', 'Mega – Image Stock', 'admin'),
+  ('salary', 'Salary', 'admin'),
+  ('accounting-for-taxes', 'Accounting For Taxes', 'admin')
+) as v(slug, name, band)
+where e.source_ref like '%:' || v.slug;
 
 create index if not exists expenses_expense_date_idx on expenses (expense_date);
 create index if not exists expenses_category_idx on expenses (category);
@@ -587,6 +678,7 @@ alter table suppliers enable row level security;
 alter table resellers enable row level security;
 alter table sales enable row level security;
 alter table expenses enable row level security;
+alter table expense_categories enable row level security;
 alter table purchase_orders enable row level security;
 alter table goals enable row level security;
 alter table monthly_notes enable row level security;
@@ -601,8 +693,8 @@ begin
   for t in
     select unnest(array[
       'products', 'variants', 'stock_units', 'suppliers', 'resellers', 'sales', 'expenses',
-      'purchase_orders', 'goals', 'monthly_notes', 'financial_months', 'bp_targets',
-      'historic_years'
+      'expense_categories', 'purchase_orders', 'goals', 'monthly_notes', 'financial_months',
+      'bp_targets', 'historic_years'
     ])
   loop
     execute format('drop policy if exists "authenticated full access" on %I;', t);

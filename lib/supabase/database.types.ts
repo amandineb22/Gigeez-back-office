@@ -7,7 +7,7 @@
  * and this file can be replaced wholesale.
  */
 
-import type { Channel, CostType, ExpenseCategory, GoalMetric, GoalPeriod, ResellerType } from "@/lib/types";
+import type { Channel, CostType, ExpenseCategoryBand, GoalMetric, GoalPeriod, ResellerType } from "@/lib/types";
 
 type Timestamps = {
   created_at: string;
@@ -207,11 +207,28 @@ export interface Database {
           },
         ];
       };
+      expense_categories: {
+        Row: {
+          id: string;
+          name: string;
+          band: ExpenseCategoryBand;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          band: ExpenseCategoryBand;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["expense_categories"]["Insert"]>;
+        Relationships: Relationship[];
+      };
       expenses: {
         Row: {
           id: string;
           expense_date: string;
-          category: ExpenseCategory;
+          category: string;
+          cost_band: ExpenseCategoryBand | null;
           amount: number;
           cost_type: CostType;
           vendor: string | null;
@@ -221,7 +238,8 @@ export interface Database {
         Insert: {
           id?: string;
           expense_date: string;
-          category: ExpenseCategory;
+          category: string;
+          cost_band?: ExpenseCategoryBand | null;
           amount: number;
           cost_type: CostType;
           vendor?: string | null;
