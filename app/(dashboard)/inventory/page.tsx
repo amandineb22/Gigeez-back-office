@@ -1,4 +1,5 @@
-import { getInventory, getStockUnits } from "@/lib/data/inventory";
+import { getInventory, getStockUnits, DEMO_PRODUCT_NAMES } from "@/lib/data/inventory";
+import { LinkButton } from "@/components/ui/Button";
 import { getAllSales } from "@/lib/data/sales";
 import { formatCurrency } from "@/lib/utils";
 import { parseCurrencyParam } from "@/lib/currency";
@@ -9,16 +10,6 @@ import { StockTable, type StockRow } from "@/components/inventory/StockTable";
 
 const DEAD_STOCK_THRESHOLD_DAYS = 60;
 
-// Sample/demo products from the app's seed script (npm run seed) — not part
-// of the real Gigeez stock sheet. Hidden here rather than deleted, so
-// nothing is lost if a database still has them.
-const DEMO_PRODUCT_NAMES = new Set([
-  "Linen Wrap Dress",
-  "Organic Cotton Tee",
-  "Tailored Wool Trousers",
-  "Quilted Field Jacket",
-  "Woven Leather Belt",
-]);
 
 export default async function InventoryPage({
   searchParams,
@@ -73,7 +64,17 @@ export default async function InventoryPage({
 
   return (
     <div className="space-y-5">
-      <h1 className="font-display text-2xl text-ink">Stock</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="font-display text-2xl text-ink">Stock</h1>
+        <div className="flex gap-2">
+          <LinkButton href="/products/new" variant="secondary" size="sm">
+            New model
+          </LinkButton>
+          <LinkButton href="/inventory/new" size="sm">
+            Add stock
+          </LinkButton>
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Card>
