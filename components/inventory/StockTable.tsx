@@ -7,6 +7,7 @@ import type { InventoryRow } from "@/lib/types";
 import { Badge } from "@/components/ui/Badge";
 import { Table, Thead, Th, Tr, Td } from "@/components/ui/Table";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { LinkButton } from "@/components/ui/Button";
 
 export interface StockRow extends InventoryRow {
   /** bin_location -> count of physical pieces currently there. */
@@ -94,6 +95,7 @@ export function StockTable({
               <Th>Stock</Th>
               <Th>Retail price</Th>
               <Th>Status</Th>
+              <Th />
             </tr>
           </Thead>
           <tbody>
@@ -129,6 +131,11 @@ export function StockTable({
                       {deadStockIds.has(row.variant_id) && <Badge variant="danger">Dead stock</Badge>}
                       {!row.low_stock && !deadStockIds.has(row.variant_id) && <Badge variant="success">Healthy</Badge>}
                     </div>
+                  </Td>
+                  <Td>
+                    <LinkButton href={`/inventory/${row.variant_id}`} variant="ghost" size="sm">
+                      Edit
+                    </LinkButton>
                   </Td>
                 </Tr>
               );
