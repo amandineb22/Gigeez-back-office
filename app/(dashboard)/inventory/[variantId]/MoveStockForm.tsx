@@ -33,7 +33,7 @@ export function MoveStockForm({
             ))}
           </Select>
         </FormField>
-        <FormField label="Pieces" htmlFor="move-count">
+        <FormField label="How many" htmlFor="move-count">
           <Input id="move-count" name="count" type="number" min={1} step={1} required defaultValue={1} />
         </FormField>
         <FormField label="To" htmlFor="move-to">

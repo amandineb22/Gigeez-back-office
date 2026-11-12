@@ -85,7 +85,7 @@ export default async function EditStockPage({
 
       <Card>
         <CardHeader>
-          <CardTitle>Where the pieces are</CardTitle>
+          <CardTitle>{units.length === 1 ? "Where it is" : `Where the ${units.length} pieces are`}</CardTitle>
         </CardHeader>
         {units.length === 0 ? (
           <p className="text-sm text-ink/50">No pieces in stock.</p>
@@ -110,9 +110,9 @@ export default async function EditStockPage({
       <Card className="p-0">
         <div className="p-5 pb-0">
           <CardHeader className="mb-0">
-            <CardTitle>Each piece</CardTitle>
+            <CardTitle>{units.length === 1 ? "The piece" : "Each piece"}</CardTitle>
           </CardHeader>
-          <p className="mt-1 text-xs text-ink/40">Change one piece&apos;s location or add a note to it.</p>
+          <p className="mt-1 text-xs text-ink/40">{units.length === 1 ? "Change its location or add a note to it." : "Change one piece's location or add a note to it."}</p>
         </div>
         {units.length === 0 ? (
           <div className="p-5">
