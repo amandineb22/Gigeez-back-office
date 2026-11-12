@@ -59,7 +59,7 @@ export function MoveStockForm({
             </Select>
           )}
           <span>to</span>
-          <LocationInput id="move-to" name="to" locations={locations} placeholder="e.g. PORTO V" className="w-56" />
+          <LocationInput id="move-to" name="to" locations={locations} className="w-56" />
           <Button type="submit" disabled={pending}>
             {pending ? "Moving…" : "Move"}
           </Button>

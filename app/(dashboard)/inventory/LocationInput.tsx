@@ -1,16 +1,20 @@
-import { Input } from "@/components/ui/Field";
+"use client";
+
+import { useState } from "react";
+import { Input, Select } from "@/components/ui/Field";
+
+const NEW = "__new__";
 
 /**
- * Free-text location with the locations already in use offered as
- * suggestions, so a brand-new boutique can be typed in while existing ones
- * keep their exact spelling.
+ * Dropdown of every known location, with a last "New location…" option that
+ * swaps in a text box for a boutique that isn't on the list yet.
  */
 export function LocationInput({
   id,
   name,
   locations,
   defaultValue,
-  placeholder = "e.g. WHSE",
+  placeholder = "Choose a location…",
   className,
 }: {
   id: string;
@@ -20,24 +24,31 @@ export function LocationInput({
   placeholder?: string;
   className?: string;
 }) {
-  const listId = `${id}-options`;
+  const options = defaultValue && !locations.includes(defaultValue) ? [defaultValue, ...locations] : locations;
+  const [choice, setChoice] = useState(defaultValue ?? "");
+
+  if (choice === NEW) {
+    return (
+      <div className="flex items-center gap-2">
+        <Input id={id} name={name} required autoFocus placeholder="New location name" className={className} />
+        <button type="button" onClick={() => setChoice("")} className="text-xs text-ink/50 hover:text-ink">
+          Back to list
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <>
-      <Input
-        id={id}
-        name={name}
-        list={listId}
-        required
-        autoComplete="off"
-        defaultValue={defaultValue}
-        placeholder={placeholder}
-        className={className}
-      />
-      <datalist id={listId}>
-        {locations.map((loc) => (
-          <option key={loc} value={loc} />
-        ))}
-      </datalist>
-    </>
+    <Select id={id} name={name} required value={choice} onChange={(e) => setChoice(e.target.value)} className={className}>
+      <option value="" disabled>
+        {placeholder}
+      </option>
+      {options.map((loc) => (
+        <option key={loc} value={loc}>
+          {loc}
+        </option>
+      ))}
+      <option value={NEW}>+ New location…</option>
+    </Select>
   );
 }
