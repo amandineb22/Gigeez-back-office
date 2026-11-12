@@ -111,28 +111,6 @@ export async function moveStock(variantId: string, _prevState: FormState, formDa
   return { error: null };
 }
 
-/** Edits one physical piece's location and note. */
-export async function updateStockUnit(
-  unitId: string,
-  variantId: string,
-  _prevState: FormState,
-  formData: FormData
-): Promise<FormState> {
-  const supabase = await createClient();
-  const location = await canonicalLocation(supabase, String(formData.get("location") ?? ""));
-  if (!location) return { error: "Location can't be empty." };
-  const notes = String(formData.get("notes") ?? "").trim() || null;
-
-  const { error } = await supabase
-    .from("stock_units")
-    .update({ bin_location: location, notes })
-    .eq("id", unitId);
-  if (error) return { error: error.message };
-
-  revalidateStock(variantId);
-  return { error: null };
-}
-
 /**
  * Removes a piece that was entered by mistake, lost/damaged, or already sold
  * through the Sales page, keeping the SKU's stock count in step. Not for sales — recording a sale on the
@@ -163,4 +141,20 @@ export async function removeStockUnit(unitId: string, variantId: string) {
   }
 
   revalidateStock(variantId);
+}
+
+/** Removes one piece of a SKU from a location (the oldest one there). */
+export async function removeOneAt(variantId: string, location: string) {
+  const supabase = await createClient();
+  const { data: units, error } = await supabase
+    .from("stock_units")
+    .select("id")
+    .eq("variant_id", variantId)
+    .eq("status", "in_stock")
+    .eq("bin_location", location)
+    .order("created_at")
+    .limit(1);
+  if (error) throw new Error(error.message);
+  if (!units || !units.length) throw new Error(`No piece of this SKU is at ${location}.`);
+  await removeStockUnit(units[0].id, variantId);
 }

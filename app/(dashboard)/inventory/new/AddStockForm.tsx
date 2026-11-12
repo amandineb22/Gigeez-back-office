@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 import Link from "next/link";
-import { FormField, Input, Select, Textarea } from "@/components/ui/Field";
+import { FormField, Input, Select } from "@/components/ui/Field";
 import { Button } from "@/components/ui/Button";
 import { addStock, type FormState } from "@/lib/actions/stock";
 import { LocationInput } from "../LocationInput";
@@ -38,7 +38,7 @@ export function AddStockForm({
       <FormField
         label="SKU"
         htmlFor="variant_id"
-        hint="Model, size and colour. New model or size not listed? Create it under Products first."
+        hint="Not listed? Add the model under Products first."
       >
         <Select id="variant_id" name="variant_id" required defaultValue={defaultVariantId ?? ""}>
           <option value="" disabled>
@@ -64,10 +64,6 @@ export function AddStockForm({
           <LocationInput id="location" name="location" locations={locations} defaultValue="WHSE" />
         </FormField>
       </div>
-
-      <FormField label="Note" htmlFor="notes" hint="Optional — e.g. which delivery they came in">
-        <Textarea id="notes" name="notes" className="min-h-[4rem]" />
-      </FormField>
 
       {state.error && (
         <p role="alert" className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
